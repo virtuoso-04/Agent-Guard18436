@@ -2,6 +2,15 @@
 
 This file provides guidance to AI coding assistants (e.g., Claude Code, GitHub Copilot, Cursor) when working with this repository.
 
+## Detailed Reference Docs
+
+Read these before making non-trivial changes:
+
+- `.claude/project.md` — What this project is, constraints, limitations, future direction
+- `.claude/architecture.md` — Full monorepo layout, data flows, agent system, storage layer, key file paths
+- `.claude/development.md` — Commands, environment setup, build system, code style, checklists
+- `.claude/extending.md` — Concrete recipes for adding actions, agents, providers, storage, UI, port messages
+
 ## Project Overview
 
 Nanobrowser is an open-source AI web automation Chrome extension that runs multi-agent systems locally in the browser. It's a free alternative to OpenAI Operator with support for multiple LLM providers (OpenAI, Anthropic, Gemini, Ollama, etc.).
