@@ -42,7 +42,7 @@ import { ToonErrorCode, DEFAULT_CONSTRAINTS } from './types';
 
 // ── Tokenizer helpers ─────────────────────────────────────────────────────────
 
-function err<T>(errorCode: ToonErrorCode, error: string): ToonParseResult<T> {
+function err<T extends ToonData = ToonData>(errorCode: ToonErrorCode, error: string): ToonParseResult<T> {
   return { ok: false, error, errorCode };
 }
 
@@ -226,7 +226,7 @@ function parseDataBlock(
     const fieldDef = fieldMap.get(name)!;
     const value = parseValue(valueRaw, fieldDef, constraints);
 
-    if (typeof value === 'string' && Object.values(ToonErrorCode).includes(value as ToonErrorCode)) {
+    if (typeof value === 'string' && (Object.values(ToonErrorCode) as string[]).includes(value)) {
       return {
         errorCode: value as ToonErrorCode,
         error: `Field "${name}": ${value}`,
@@ -329,7 +329,8 @@ export function parseToon<T extends ToonData = ToonData>(
 
   const dataResult = parseDataBlock(sections.dataLines, schemaResult, constraints);
   if ('errorCode' in dataResult) {
-    return err(dataResult.errorCode, dataResult.error);
+    const errorResult = dataResult as { errorCode: ToonErrorCode; error: string };
+    return err(errorResult.errorCode, errorResult.error);
   }
 
   const document: ToonDocument = { schema: schemaResult, data: dataResult };

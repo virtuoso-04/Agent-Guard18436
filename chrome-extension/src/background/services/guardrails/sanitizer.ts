@@ -113,7 +113,7 @@ export function sanitizeContent(content: string | undefined, strict: boolean = f
   } while (passes < MAX_PASSES);
 
   if (passes >= MAX_PASSES) {
-    logger.warn(`Sanitizer did not converge after ${MAX_PASSES} passes — possible pathological input`);
+    logger.info(`Sanitizer did not converge after ${MAX_PASSES} passes — possible pathological input`);
   }
 
   const wasModified = current !== content;

@@ -1,6 +1,8 @@
 import { HumanMessage, type SystemMessage } from '@langchain/core/messages';
 import type { AgentContext } from '@src/background/agent/types';
-import { wrapUntrustedContent } from '../messages/utils';
+import { wrapUntrustedContent, filterExternalContentWithReport } from '../messages/utils';
+import { recordDetection } from '@src/background/services/guardrails/securityState';
+import { Actors, ExecutionState } from '../event/types';
 import { createLogger } from '@src/background/log';
 
 const logger = createLogger('BasePrompt');
@@ -34,7 +36,19 @@ abstract class BasePrompt {
     if (rawElementsText !== '') {
       const scrollInfo = `[Scroll info of current page] window.scrollY: ${browserState.scrollY}, document.body.scrollHeight: ${browserState.scrollHeight}, window.visualViewport.height: ${browserState.visualViewportHeight}, visual viewport height as percentage of scrollable distance: ${Math.round((browserState.visualViewportHeight / (browserState.scrollHeight - browserState.visualViewportHeight)) * 100)}%\n`;
       logger.info(scrollInfo);
-      const elementsText = wrapUntrustedContent(rawElementsText);
+
+      // Sanitize page content and track any injection attempts in the security state
+      const sanitizationResult = filterExternalContentWithReport(rawElementsText);
+      if (sanitizationResult.modified && sanitizationResult.threats.length > 0) {
+        context.securityState = recordDetection(context.securityState, `step-${context.nSteps}`, false);
+        await context.emitEvent(
+          Actors.SYSTEM,
+          ExecutionState.SECURITY_LEVEL_CHANGE,
+          `${context.securityState.level}:${context.securityState.injectionCount}`,
+        );
+      }
+
+      const elementsText = wrapUntrustedContent(sanitizationResult.sanitized, false);
       formattedElementsText = `${scrollInfo}[Start of page]\n${elementsText}\n[End of page]\n`;
     } else {
       formattedElementsText = 'empty page';

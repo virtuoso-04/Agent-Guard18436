@@ -17,7 +17,7 @@ const ALGORITHM = { name: 'HMAC', hash: 'SHA-256' } as const;
  * Call once per Executor instance.
  */
 export async function generateSessionKey(): Promise<CryptoKey> {
-  return crypto.subtle.generateKey(ALGORITHM, false /* non-extractable */, ['sign', 'verify']);
+  return crypto.subtle.generateKey(ALGORITHM, false /* non-extractable */, ['sign', 'verify']) as Promise<CryptoKey>;
 }
 
 /**
