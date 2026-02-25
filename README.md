@@ -13,42 +13,57 @@
 
 </div>
 
-## 🌐 Nanobrowser
+## 🌐 Agent-Guard
 
-Nanobrowser is an open-source AI web automation tool that runs in your browser. A free alternative to OpenAI Operator with flexible LLM options and multi-agent system.
+Agent-Guard is an open-source, security-hardened AI web automation Chrome extension with a built-in multi-agent system. It's a free alternative to OpenAI Operator — with enterprise-grade defenses against prompt injection, zero-click attacks, phishing, and model poisoning built directly into the agent runtime.
 
 ⬇️ Get [Nanobrowser from Chrome Web Store](https://chromewebstore.google.com/detail/nanobrowser/imbddededgmcgfhfpcjmijokokekbkal) for free
 
 👏 Join the community in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/nanobrowser_ai)
 
-🌟 Loving Nanobrowser? Give us a star  and help spread the word!
+🌟 Loving Agent-Guard? Give us a star and help spread the word!
 
-❤️ Support the project by [sponsoring us](https://github.com/sponsors/alexchenzl) - every contribution helps keep Nanobrowser free and open source!
+❤️ Support the project by [sponsoring us](https://github.com/sponsors/alexchenzl) - every contribution helps keep Agent-Guard free and open source!
 
 <div align="center">
 <img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="Nanobrowser Demo GIF" />
 <p><em>Nanobrowser's multi-agent system analyzing HuggingFace in real-time, with the Planner intelligently self-correcting when encountering obstacles and dynamically instructing the Navigator to adjust its approach—all running locally in your browser.</em></p>
 </div>
 
-## 🔥Why Nanobrowser?
+## 🔥 Why Agent-Guard?
 
-Looking for a powerful AI browser agent without the $200/month price tag of OpenAI Operator? **Nanobrowser** , as a chrome extension, delivers premium web automation capabilities while keeping you in complete control:
+Looking for a powerful AI browser agent without the $200/month price tag of OpenAI Operator — and one that actually takes security seriously? **Agent-Guard** delivers premium web automation with a security layer built into the agent runtime, not bolted on after:
 
-- **100% Free** - No subscription fees or hidden costs. Just install and use your own API keys, and you only pay what you use with your own API keys.
-- **Privacy-Focused** - Everything runs in your local browser. Your credentials stay with you, never shared with any cloud service.
-- **Flexible LLM Options** - Connect to your preferred LLM providers with the freedom to choose different models for different agents.
-- **Fully Open Source** - Complete transparency in how your browser is automated. No black boxes or hidden processes.
+- **100% Free** - No subscription fees or hidden costs. Use your own API keys and only pay for what you use.
+- **Security-First Architecture** - Multi-layer defenses against prompt injection, phishing, zero-click attacks, and model poisoning — running locally alongside the agents that need protecting.
+- **Privacy-Focused** - Everything runs in your local browser. Your credentials never leave your machine.
+- **Flexible LLM Options** - Connect any preferred provider and assign different models to different agents.
+- **Fully Open Source** - Complete transparency in how your browser is automated and how it's secured. No black boxes.
 
-> **Note:** We currently support OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, Llama and custom OpenAI-Compatible providers, more providers will be supported.
+> **Supported providers:** OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, Llama, and custom OpenAI-compatible providers.
 
+## 🔐 Security Roadmap
+
+Agent-Guard is building industry-grade security into every layer of the AI agent stack across four production-ready phases:
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **Phase 1** | Prompt Injection Defense & Content Integrity — multi-pass sanitization, TOON format, cryptographic message provenance, threat audit log | 🚧 In Progress |
+| **Phase 2** | Zero-Click Attack Prevention & DOM Integrity — element fingerprinting, action confirmation gate, DOM taint analysis, atomic state locking | 📋 Planned |
+| **Phase 3** | Phishing Detection & Navigation Trust — domain lookalike scoring, page heuristics, redirect chain auditing, smart firewall | 📋 Planned |
+| **Phase 4** | Model Poisoning Resistance — intent anchoring, behavioral anomaly detection, tamper-evident reasoning traces, operator dashboard | 📋 Planned |
+
+See the full roadmap and open issues: [Security Issues →](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity)
 
 ## 📊 Key Features
 
-- **Multi-agent System**: Specialized AI agents collaborate to accomplish complex web workflows
-- **Interactive Side Panel**: Intuitive chat interface with real-time status updates
-- **Task Automation**: Seamlessly automate repetitive web automation tasks across websites
+- **Multi-agent System**: Specialized AI agents (Planner + Navigator) collaborate to accomplish complex web workflows
+- **Security Event Stream**: Real-time visibility into what the security layer is detecting and blocking
+- **Interactive Side Panel**: Intuitive chat interface with real-time status updates and security badge
+- **Task Automation**: Seamlessly automate repetitive web tasks across websites, with safety guardrails
 - **Follow-up Questions**: Ask contextual follow-up questions about completed tasks
 - **Conversation History**: Easily access and manage your AI agent interaction history
+- **Task Replay**: Record and replay task execution with full integrity verification
 - **Multiple LLM Support**: Connect your preferred LLM providers and assign different models to different agents
 
 
@@ -194,13 +209,15 @@ Here are some powerful tasks you can accomplish with just a sentence:
 
 ## 🛠️ Roadmap
 
-We're actively developing Nanobrowser with exciting features on the horizon, welcome to join us! 
+We're actively developing Agent-Guard with exciting features on the horizon — welcome to join us!
 
-Check out our detailed roadmap and upcoming features in our [GitHub Discussions](https://github.com/nanobrowser/nanobrowser/discussions/85). 
+**Security hardening** is our current primary focus. Each security phase ships as a standalone, production-ready milestone with its own unit and integration test suite. Track progress in our [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity).
+
+For the full feature roadmap and broader discussions, visit our [GitHub Discussions](https://github.com/nanobrowser/nanobrowser/discussions/85).
 
 ## 🤝 Contributing
 
-**We need your help to make Nanobrowser even better!**  Contributions of all kinds are welcome:
+**We need your help to make Agent-Guard even better!** Contributions of all kinds are welcome:
 
 *  **Share Prompts & Use Cases** 
    * Join our [Discord server](https://discord.gg/NN3ABHggMK).
@@ -212,24 +229,27 @@ Check out our detailed roadmap and upcoming features in our [GitHub Discussions]
    * Submit pull requests for bug fixes, features, or documentation improvements.
 
 
-We believe in the power of open source and community collaboration.  Join us in building the future of web automation!
+We believe in the power of open source and community collaboration. Join us in building the future of secure web automation!
 
 
 ## 🔒 Security
 
+Agent-Guard is built with security as a first-class concern. Our [Security Roadmap](.claude/SECURITY_ROADMAP.md) documents our four-phase hardening program covering prompt injection defense, zero-click attack prevention, phishing detection, and model poisoning resistance.
+
 If you discover a security vulnerability, please **DO NOT** disclose it publicly through issues, pull requests, or discussions.
 
-Instead, please create a [GitHub Security Advisory](https://github.com/nanobrowser/nanobrowser/security/advisories/new) to report the vulnerability responsibly. This allows us to address the issue before it's publicly disclosed.
+Instead, please create a [GitHub Security Advisory](https://github.com/TShreek/Agent-Guard18436/security/advisories/new) to report the vulnerability responsibly. This allows us to address the issue before it's publicly disclosed.
 
-We appreciate your help in keeping Nanobrowser and its users safe!
+We appreciate your help in keeping Agent-Guard and its users safe!
 
 ## 💬 Community
 
 Join our growing community of developers and users:
 
-- [Discord](https://discord.gg/NN3ABHggMK) - Chat with team and community
+- [Discord](https://discord.gg/NN3ABHggMK) - Chat with the team and community
 - [Twitter](https://x.com/nanobrowser_ai) - Follow for updates and announcements
 - [GitHub Discussions](https://github.com/nanobrowser/nanobrowser/discussions) - Share ideas and ask questions
+- [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity) - Track the security hardening roadmap
 
 ## 👏 Acknowledgments
 
@@ -246,9 +266,9 @@ Huge thanks to their creators and contributors!
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-Made with ❤️ by the Nanobrowser Team. 
+Made with ❤️ by the Agent-Guard Team.
 
-Like Nanobrowser? Give us a star 🌟 and join us in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/nanobrowser_ai)
+Like Agent-Guard? Give us a star 🌟 and join us in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/nanobrowser_ai)
 
 ## ⚠️ DISCLAIMER ON DERIVATIVE PROJECTS
 
