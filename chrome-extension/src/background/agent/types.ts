@@ -6,6 +6,7 @@ import type MessageManager from './messages/service';
 import type { EventManager } from './event/manager';
 import { type Actors, type ExecutionState, AgentEvent } from './event/types';
 import { AgentStepHistory } from './history';
+import { type TaskSecurityState, createSecurityState } from '../services/guardrails/securityState';
 
 export interface AgentOptions {
   maxSteps: number;
@@ -49,6 +50,8 @@ export class AgentContext {
   stateMessageAdded: boolean;
   history: AgentStepHistory;
   finalAnswer: string | null;
+  /** Current task-level security state (Issue 1.5) — reset to NORMAL for each new task */
+  securityState: TaskSecurityState;
 
   constructor(
     taskId: string,
@@ -73,6 +76,7 @@ export class AgentContext {
     this.stateMessageAdded = false;
     this.history = new AgentStepHistory();
     this.finalAnswer = null;
+    this.securityState = createSecurityState();
   }
 
   async emitEvent(actor: Actors, state: ExecutionState, eventDetails: string) {
