@@ -40,7 +40,9 @@ export const CONFUSABLES_MAP: Record<string, string> = {
   '\u0421': 'C', // С  CYRILLIC CAPITAL LETTER ES
   '\u0422': 'T', // Т  CYRILLIC CAPITAL LETTER TE
   '\u0425': 'X', // Х  CYRILLIC CAPITAL LETTER HA
-  '\u0443\u0301': 'y', // у́ CYRILLIC SMALL LETTER U + combining acute
+  // у́ (U+0443 + U+0301 combining acute) is decomposed to U+0443 by NFKC
+  // normalization in sanitizer Step 1, so the combining mark never reaches
+  // this map. U+0443 alone is already mapped above to 'y'.
 
   // ── Greek → Latin (lowercase) ─────────────────────────────────────────────
   '\u03B1': 'a', // α  GREEK SMALL LETTER ALPHA

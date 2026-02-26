@@ -104,35 +104,6 @@ export function recordDetection(
   return next;
 }
 
-/**
- * Human-readable label for display in the SecurityBadge.
- */
-export function securityLevelLabel(level: SecurityLevel): string {
-  switch (level) {
-    case SecurityLevel.NORMAL:
-      return 'Normal';
-    case SecurityLevel.ELEVATED:
-      return 'Elevated';
-    case SecurityLevel.HIGH:
-      return 'High';
-    case SecurityLevel.CRITICAL:
-      return 'Critical';
-  }
-}
-
-/**
- * Tailwind colour token for the badge at each level.
- * green / yellow / orange / red
- */
-export function securityLevelColor(level: SecurityLevel): string {
-  switch (level) {
-    case SecurityLevel.NORMAL:
-      return 'green';
-    case SecurityLevel.ELEVATED:
-      return 'yellow';
-    case SecurityLevel.HIGH:
-      return 'orange';
-    case SecurityLevel.CRITICAL:
-      return 'red';
-  }
-}
+// Note: display helpers (label/colour) live in SecurityBadge.tsx (LEVEL_CONFIG)
+// where they are co-located with the UI that consumes them, avoiding a
+// cross-package import from the background service worker to the side panel.

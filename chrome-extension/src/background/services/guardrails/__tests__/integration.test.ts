@@ -35,16 +35,18 @@ describe('Injection corpus — full detection coverage', () => {
     expect(missed).toHaveLength(0);
   });
 
-  it('false positive rate < 20% on benign samples', () => {
-    // Note: we allow up to 20% FP since some benign phrases may overlap with patterns.
-    // Production tuning should push this below 5%.
-    let falsePositives = 0;
+  it('false positive rate < 5% on benign samples', () => {
+    // 5% is a production-grade threshold. Raise the bar as patterns are tuned.
+    const falsePositives: string[] = [];
     for (const entry of benignPayloads) {
       const threats = detectThreats(entry.payload, false);
-      if (threats.length > 0) falsePositives++;
+      if (threats.length > 0) falsePositives.push(`[${entry.id}] "${entry.payload.slice(0, 60)}"`);
     }
-    const fpRate = benignPayloads.length > 0 ? falsePositives / benignPayloads.length : 0;
-    expect(fpRate).toBeLessThan(0.2);
+    if (falsePositives.length > 0) {
+      console.warn('False positives on benign samples:\n' + falsePositives.join('\n'));
+    }
+    const fpRate = benignPayloads.length > 0 ? falsePositives.length / benignPayloads.length : 0;
+    expect(fpRate).toBeLessThan(0.05);
   });
 
   it('sanitizes all malicious payloads (modified flag set)', () => {

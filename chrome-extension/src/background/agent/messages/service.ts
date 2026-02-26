@@ -260,17 +260,25 @@ export default class MessageManager {
    * @param sourceUrl    - URL of the page this state was extracted from
    */
   public addStateMessage(stateMessage: HumanMessage, sourceUrl?: string): void {
+    // Add the message first so its metadata object exists in history
+    this.addMessageWithTokens(stateMessage);
+
+    // Capture a direct reference to the just-inserted metadata record.
+    // This avoids a race condition where the last-index heuristic could
+    // target a different message if another message is added before the
+    // async HMAC signing completes.
+    const insertedMetadata = this.history.messages[this.history.messages.length - 1].metadata;
+
     const contentStr =
       typeof stateMessage.content === 'string' ? stateMessage.content : JSON.stringify(stateMessage.content);
-    // Sign asynchronously and attach provenance to metadata when ready
-    this.buildProvenance(contentStr, MessageOrigin.PAGE_CONTENT, { sourceUrl }).then(provenance => {
-      // Find the most recently added state message and update its provenance
-      const msgs = this.history.messages;
-      if (msgs.length > 0) {
-        msgs[msgs.length - 1].metadata.provenance = provenance;
-      }
-    });
-    this.addMessageWithTokens(stateMessage);
+
+    this.buildProvenance(contentStr, MessageOrigin.PAGE_CONTENT, { sourceUrl })
+      .then(provenance => {
+        insertedMetadata.provenance = provenance;
+      })
+      .catch(err => {
+        logger.error('Failed to build provenance for state message:', err);
+      });
   }
 
   /**

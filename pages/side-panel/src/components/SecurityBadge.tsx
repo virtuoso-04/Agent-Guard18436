@@ -11,7 +11,7 @@
  * The badge resets to NORMAL (hidden) when a new task starts.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export enum SecurityLevel {
   NORMAL = 0,
@@ -62,6 +62,19 @@ const LEVEL_CONFIG: Record<SecurityLevel, { label: string; bg: string; text: str
 
 export default function SecurityBadge({ level, detectionCount, eventSummary = [] }: SecurityBadgeProps) {
   const [expanded, setExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close tooltip when user clicks outside the badge container
+  useEffect(() => {
+    if (!expanded) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setExpanded(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [expanded]);
 
   // Don't render anything when there are no threats and we are at NORMAL level
   if (level === SecurityLevel.NORMAL && detectionCount === 0) {
@@ -71,16 +84,19 @@ export default function SecurityBadge({ level, detectionCount, eventSummary = []
   const config = LEVEL_CONFIG[level];
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setExpanded(prev => !prev)}
+        aria-expanded={expanded}
+        aria-haspopup="true"
         aria-label={`Security level: ${config.label}. ${detectionCount} threat(s) detected. Click for details.`}
         className={[
           'flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all',
           config.bg,
           config.text,
           config.border,
-          config.pulse ? 'animate-pulse' : '',
+          // motion-safe: respects prefers-reduced-motion OS setting
+          config.pulse ? 'motion-safe:animate-pulse' : '',
         ]
           .filter(Boolean)
           .join(' ')}>

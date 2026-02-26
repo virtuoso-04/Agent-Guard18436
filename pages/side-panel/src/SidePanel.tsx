@@ -192,12 +192,20 @@ const SidePanel = () => {
             case ExecutionState.TASK_RESUME:
               break;
             case ExecutionState.SECURITY_LEVEL_CHANGE: {
-              // details encodes "level:count" e.g. "2:3"
-              const [lvlStr, cntStr] = content.split(':');
-              const newLevel = parseInt(lvlStr, 10) as SecurityLevel;
-              const newCount = parseInt(cntStr, 10);
-              if (!isNaN(newLevel)) setSecurityLevel(newLevel);
-              if (!isNaN(newCount)) setSecurityDetectionCount(newCount);
+              // Payload encodes "level:count" e.g. "2:3".
+              // Guard against malformed payloads with a length check and
+              // explicit numeric bounds before applying the values.
+              const parts = content.split(':');
+              if (parts.length >= 2) {
+                const newLevel = parseInt(parts[0], 10) as SecurityLevel;
+                const newCount = parseInt(parts[1], 10);
+                if (!isNaN(newLevel) && newLevel >= SecurityLevel.NORMAL && newLevel <= SecurityLevel.CRITICAL) {
+                  setSecurityLevel(newLevel);
+                }
+                if (!isNaN(newCount) && newCount >= 0) {
+                  setSecurityDetectionCount(newCount);
+                }
+              }
               skip = true; // don't add a chat message for security events
               break;
             }

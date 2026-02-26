@@ -116,10 +116,11 @@ export function sanitizeContent(content: string | undefined, strict: boolean = f
     logger.info(`Sanitizer did not converge after ${MAX_PASSES} passes — possible pathological input`);
   }
 
-  const wasModified = current !== content;
-
   // ── Step 6: Post-pass cleanup ────────────────────────────────────────────
-  if (wasModified || mixedScript) {
+  // Run cleanup whenever content changed *or* mixed scripts were detected
+  // (mixed-script handling normalises chars that can introduce extra spaces).
+  const preCleanup = current;
+  if (preCleanup !== content || mixedScript) {
     current = current
       .replace(/[^\S\r\n]+/g, ' ') // Collapse spaces/tabs (keep newlines)
       .replace(/\n{3,}/g, '\n\n') // Max 2 consecutive blank lines
@@ -128,10 +129,13 @@ export function sanitizeContent(content: string | undefined, strict: boolean = f
     current = cleanEmptyTags(current);
   }
 
+  // Compare final output against the original input so that cleanup-only
+  // changes (whitespace normalization triggered by mixedScript) are captured
+  // in the modified flag.
   return {
     sanitized: current,
     threats: Array.from(allThreats),
-    modified: wasModified,
+    modified: current !== content,
   };
 }
 
