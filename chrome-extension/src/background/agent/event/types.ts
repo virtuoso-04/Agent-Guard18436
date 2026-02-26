@@ -45,6 +45,9 @@ export enum ExecutionState {
   ACT_START = 'act.start',
   ACT_OK = 'act.ok',
   ACT_FAIL = 'act.fail',
+
+  // Security events (Issue 1.5) — emitted when the task security level changes
+  SECURITY_LEVEL_CHANGE = 'security.level_change',
 }
 
 export interface EventData {

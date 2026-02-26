@@ -15,13 +15,19 @@ export enum ThreatType {
 }
 
 /**
- * Simplified security pattern
+ * Security pattern / sanitization rule entry.
+ * Each rule has a unique id so it can be tested and referenced in threat events.
  */
 export interface SecurityPattern {
+  /** Unique rule identifier (e.g. "task_override_ignore") */
+  id: string;
   pattern: RegExp;
   type: ThreatType;
   description: string;
-  replacement?: string; // What to replace the matched pattern with
+  /** Replacement string or function. Empty string removes the match. */
+  replacement?: string | ((match: string) => string);
+  /** When true the rule only runs in strict mode */
+  strictOnly?: boolean;
 }
 
 /**

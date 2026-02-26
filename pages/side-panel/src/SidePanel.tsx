@@ -11,6 +11,7 @@ import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
+import SecurityBadge, { SecurityLevel } from './components/SecurityBadge';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import './SidePanel.css';
 
@@ -38,6 +39,9 @@ const SidePanel = () => {
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
   const [isReplaying, setIsReplaying] = useState(false);
   const [replayEnabled, setReplayEnabled] = useState(false);
+  // Security badge state (Issue 1.5)
+  const [securityLevel, setSecurityLevel] = useState<SecurityLevel>(SecurityLevel.NORMAL);
+  const [securityDetectionCount, setSecurityDetectionCount] = useState(0);
   const sessionIdRef = useRef<string | null>(null);
   const isReplayingRef = useRef<boolean>(false);
   const portRef = useRef<chrome.runtime.Port | null>(null);
@@ -158,8 +162,10 @@ const SidePanel = () => {
         case Actors.SYSTEM:
           switch (state) {
             case ExecutionState.TASK_START:
-              // Reset historical session flag when a new task starts
+              // Reset historical session flag and security badge when a new task starts
               setIsHistoricalSession(false);
+              setSecurityLevel(SecurityLevel.NORMAL);
+              setSecurityDetectionCount(0);
               break;
             case ExecutionState.TASK_OK:
               setIsFollowUpMode(true);
@@ -185,6 +191,24 @@ const SidePanel = () => {
               break;
             case ExecutionState.TASK_RESUME:
               break;
+            case ExecutionState.SECURITY_LEVEL_CHANGE: {
+              // Payload encodes "level:count" e.g. "2:3".
+              // Guard against malformed payloads with a length check and
+              // explicit numeric bounds before applying the values.
+              const parts = content.split(':');
+              if (parts.length >= 2) {
+                const newLevel = parseInt(parts[0], 10) as SecurityLevel;
+                const newCount = parseInt(parts[1], 10);
+                if (!isNaN(newLevel) && newLevel >= SecurityLevel.NORMAL && newLevel <= SecurityLevel.CRITICAL) {
+                  setSecurityLevel(newLevel);
+                }
+                if (!isNaN(newCount) && newCount >= 0) {
+                  setSecurityDetectionCount(newCount);
+                }
+              }
+              skip = true; // don't add a chat message for security events
+              break;
+            }
             default:
               console.error('Invalid task state', state);
               return;
@@ -1018,6 +1042,8 @@ const SidePanel = () => {
             )}
           </div>
           <div className="header-icons">
+            {/* Security level badge — only shows when threats have been detected */}
+            <SecurityBadge level={securityLevel} detectionCount={securityDetectionCount} />
             {!showHistory && (
               <>
                 <button

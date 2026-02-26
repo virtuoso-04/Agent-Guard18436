@@ -1,5 +1,10 @@
 import { type BaseMessage, AIMessage, HumanMessage, type SystemMessage, ToolMessage } from '@langchain/core/messages';
-import { MessageHistory, MessageMetadata } from '@src/background/agent/messages/views';
+import {
+  MessageHistory,
+  MessageMetadata,
+  MessageOrigin,
+  type MessageProvenance,
+} from '@src/background/agent/messages/views';
 import { createLogger } from '@src/background/log';
 import {
   filterExternalContent,
@@ -7,6 +12,7 @@ import {
   splitUserTextAndAttachments,
   wrapAttachments,
 } from '@src/background/agent/messages/utils';
+import { generateSessionKey, signPayload } from '@src/background/agent/messages/crypto';
 
 const logger = createLogger('MessageManager');
 
@@ -45,11 +51,53 @@ export default class MessageManager {
   private history: MessageHistory;
   private toolId: number;
   private settings: MessageManagerSettings;
+  /** Per-session HMAC-SHA256 key — generated lazily, lives in memory only */
+  private sessionKey: CryptoKey | null = null;
+  private sessionKeyReady: Promise<void>;
+  /** Monotonically increasing step counter for provenance metadata */
+  private stepCounter = 0;
 
   constructor(settings: MessageManagerSettings = new MessageManagerSettings()) {
     this.settings = settings;
     this.history = new MessageHistory();
     this.toolId = 1;
+    // Pre-generate the session key so it's ready before the first message
+    this.sessionKeyReady = generateSessionKey().then(key => {
+      this.sessionKey = key;
+    });
+  }
+
+  /** Advance the step counter (called by Executor at the start of each step) */
+  public incrementStep(): void {
+    this.stepCounter++;
+  }
+
+  /**
+   * Build a MessageProvenance record and HMAC-sign it.
+   * Falls back to an unsigned record if the key isn't ready yet.
+   */
+  private async buildProvenance(
+    content: string,
+    origin: MessageOrigin,
+    extra?: Partial<MessageProvenance>,
+  ): Promise<MessageProvenance> {
+    await this.sessionKeyReady;
+
+    const base: Omit<MessageProvenance, 'hmac'> = {
+      origin,
+      timestamp: Date.now(),
+      sessionId: this.settings.messageContext ?? 'unknown',
+      stepNumber: this.stepCounter,
+      ...extra,
+    };
+
+    let hmac = 'unsigned';
+    if (this.sessionKey) {
+      const payload = content + JSON.stringify(base);
+      hmac = await signPayload(this.sessionKey, payload);
+    }
+
+    return { ...base, hmac };
   }
 
   public initTaskMessages(systemMessage: SystemMessage, task: string, messageContext?: string): void {
@@ -205,11 +253,32 @@ export default class MessageManager {
   }
 
   /**
-   * Adds a state message to the history
+   * Adds a state message to the history.
+   * State messages come from web page DOM content, so they are tagged
+   * PAGE_CONTENT and signed with the session key for tamper detection.
    * @param stateMessage - The HumanMessage object containing the state
+   * @param sourceUrl    - URL of the page this state was extracted from
    */
-  public addStateMessage(stateMessage: HumanMessage): void {
+  public addStateMessage(stateMessage: HumanMessage, sourceUrl?: string): void {
+    // Add the message first so its metadata object exists in history
     this.addMessageWithTokens(stateMessage);
+
+    // Capture a direct reference to the just-inserted metadata record.
+    // This avoids a race condition where the last-index heuristic could
+    // target a different message if another message is added before the
+    // async HMAC signing completes.
+    const insertedMetadata = this.history.messages[this.history.messages.length - 1].metadata;
+
+    const contentStr =
+      typeof stateMessage.content === 'string' ? stateMessage.content : JSON.stringify(stateMessage.content);
+
+    this.buildProvenance(contentStr, MessageOrigin.PAGE_CONTENT, { sourceUrl })
+      .then(provenance => {
+        insertedMetadata.provenance = provenance;
+      })
+      .catch(err => {
+        logger.error('Failed to build provenance for state message:', err);
+      });
   }
 
   /**

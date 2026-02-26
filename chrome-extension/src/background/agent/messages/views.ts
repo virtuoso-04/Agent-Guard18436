@@ -1,12 +1,48 @@
 import { type BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { Actors } from '../event/types';
+
+// ── Message provenance types (Issue 1.3) ─────────────────────────────────────
+
+/**
+ * Trust tier assigned to each message at insertion time.
+ * Used by context construction to decide how aggressively to wrap content.
+ */
+export enum MessageOrigin {
+  USER_DIRECT = 'user_direct', // Typed by the human in the side panel
+  SYSTEM_INIT = 'system_init', // Set at executor construction
+  AGENT_OUTPUT = 'agent_output', // Produced by an LLM agent
+  PAGE_CONTENT = 'page_content', // Extracted from a web page DOM
+  ACTION_RESULT = 'action_result', // Result of a browser action
+}
+
+/**
+ * Provenance metadata attached to every managed message.
+ * The `hmac` field is an HMAC-SHA256 of `content + JSON(metadata)` using the
+ * per-session signing key held by MessageManager.
+ */
+export interface MessageProvenance {
+  origin: MessageOrigin;
+  timestamp: number;
+  sessionId: string;
+  stepNumber: number;
+  /** Only set for PAGE_CONTENT messages */
+  sourceUrl?: string;
+  /** Only set for AGENT_OUTPUT messages */
+  agentActor?: Actors;
+  /** HMAC-SHA256 hex digest — verified before the message enters LLM context */
+  hmac: string;
+}
 
 export class MessageMetadata {
   tokens: number;
   message_type: string | null = null;
+  /** Provenance record set when the message was added to history */
+  provenance: MessageProvenance | null = null;
 
-  constructor(tokens: number, message_type?: string | null) {
+  constructor(tokens: number, message_type?: string | null, provenance?: MessageProvenance | null) {
     this.tokens = tokens;
     this.message_type = message_type ?? null;
+    this.provenance = provenance ?? null;
   }
 }
 
