@@ -28,6 +28,9 @@ import { convertZodToJsonSchema, repairJsonString } from '@src/background/utils'
 import { HistoryTreeProcessor } from '@src/background/browser/dom/history/service';
 import { AgentStepRecord } from '../history';
 import { type DOMHistoryElement } from '@src/background/browser/dom/history/view';
+import { domainScorer } from '../../services/phishing/domainScorer';
+import { pageAnalyzer } from '../../services/phishing/pageAnalyzer';
+import { redirectAuditor } from '../../services/phishing/redirectAuditor';
 
 const logger = createLogger('NavigatorAgent');
 
@@ -172,6 +175,28 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       // add the browser state message
       await this.addStateMessageToMemory();
       const currentState = await this.context.browserContext.getCachedState();
+
+      // ── Phishing Detection (Issue 3.1 & 3.2) ─────────────────────────
+      if (currentState) {
+        const url = (currentState as any).url || '';
+        const domainResult = domainScorer.scoreDomain(url);
+        const pageResult = await pageAnalyzer.analyze(currentState, url);
+
+        const finalRisk = domainResult.score < pageResult.score ? domainResult.risk : pageResult.risk;
+        
+        if (finalRisk === 'critical' || finalRisk === 'high') {
+          const detail = `Phishing detected! Domain Risk: ${domainResult.risk}, Page Signals: ${pageResult.signals.map(s => s.type).join(', ')}`;
+          logger.info(detail);
+          this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.PHISHING_DETECTED, detail);
+          
+          if (finalRisk === 'critical') {
+            logger.info('⛔ Critical phishing risk — pausing task for user review');
+            this.context.pause();
+            return agentOutput;
+          }
+        }
+      }
+
       browserStateHistory = new BrowserStateHistory(currentState);
 
       // check if the task is paused or stopped
@@ -211,6 +236,20 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         cancelled = true;
         return agentOutput;
       }
+
+      // ── Redirect Chain Audit (Issue 3.3) ──────────────────────────
+      const tabId = (currentState as any).tabId;
+      if (tabId) {
+        const chain = this.context.browserContext.getNavigationChain(tabId);
+        if (chain) {
+          const auditResult = await redirectAuditor.auditChain(chain, this.context.browserContext.getConfig().allowedUrls);
+          if (auditResult.crossedTrustBoundary) {
+            logger.info('Trust boundary crossed!', auditResult.reason);
+            this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.TRUST_BOUNDARY_CROSSED, auditResult.reason);
+          }
+        }
+      }
+
       // emit event
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_OK, 'Navigation done');
       let done = false;

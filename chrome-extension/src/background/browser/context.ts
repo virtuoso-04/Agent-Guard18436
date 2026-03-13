@@ -5,6 +5,8 @@ import {
   DEFAULT_BROWSER_CONTEXT_CONFIG,
   type TabInfo,
   URLNotAllowedError,
+  type NavigationHop,
+  type NavigationChain,
 } from './views';
 import Page, { build_initial_state } from './page';
 import { createLogger } from '@src/background/log';
@@ -16,9 +18,44 @@ export default class BrowserContext {
   private _config: BrowserContextConfig;
   private _currentTabId: number | null = null;
   private _attachedPages: Map<number, Page> = new Map();
+  private _navigationChains: Map<number, NavigationChain> = new Map();
 
   constructor(config: Partial<BrowserContextConfig>) {
     this._config = { ...DEFAULT_BROWSER_CONTEXT_CONFIG, ...config };
+  }
+
+  public recordNavigationHop(tabId: number, hop: NavigationHop): void {
+    let chain = this._navigationChains.get(tabId);
+    if (!chain) {
+      chain = {
+        taskId: '', // to be set when task starts
+        intendedDestination: hop.url,
+        hops: [],
+        finalDestination: hop.url,
+        crossedTrustBoundary: false,
+        chainStartedAt: Date.now(),
+      };
+      this._navigationChains.set(tabId, chain);
+    }
+    chain.hops.push(hop);
+    chain.finalDestination = hop.url;
+    logger.info(`Recorded hop for tab ${tabId}: ${hop.url} (${hop.transitionType})`);
+  }
+
+  public resetNavigationChain(tabId: number, intendedUrl: string, taskId: string): void {
+    this._navigationChains.set(tabId, {
+      taskId,
+      intendedDestination: intendedUrl,
+      hops: [],
+      finalDestination: intendedUrl,
+      crossedTrustBoundary: false,
+      chainStartedAt: Date.now(),
+    });
+    logger.info(`Reset navigation chain for tab ${tabId} to ${intendedUrl}`);
+  }
+
+  public getNavigationChain(tabId: number): NavigationChain | undefined {
+    return this._navigationChains.get(tabId);
   }
 
   public getConfig(): BrowserContextConfig {

@@ -48,6 +48,16 @@ export enum ExecutionState {
 
   // Security events (Issue 1.5) — emitted when the task security level changes
   SECURITY_LEVEL_CHANGE = 'security.level_change',
+
+  // Phishing events (Issue 1.6 / 3.2)
+  PHISHING_DETECTED = 'security.phishing_detected',
+
+  // Redirect events (Issue 3.3)
+  TRUST_BOUNDARY_CROSSED = 'security.trust_boundary_crossed',
+
+  // Credential Protection (Issue 3.4)
+  CREDENTIAL_INPUT_ON_HTTP = 'security.credential_input_on_http',
+  MFA_INPUT_DETECTED = 'security.mfa_input_detected',
 }
 
 export interface EventData {

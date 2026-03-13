@@ -108,9 +108,26 @@ export interface TabInfo {
   title: string;
 }
 
+export interface NavigationHop {
+  url: string;
+  domain: string;
+  timestamp: number;
+  transitionType: string;
+  transitionQualifiers: string[];
+}
+
+export interface NavigationChain {
+  taskId: string;
+  intendedDestination: string;
+  hops: NavigationHop[];
+  finalDestination: string;
+  crossedTrustBoundary: boolean;
+  chainStartedAt: number;
+}
+
 export interface BrowserState extends PageState {
   tabs: TabInfo[];
-  // browser_errors: string[];
+  navigationChain?: NavigationChain;
 }
 
 export class BrowserStateHistory {

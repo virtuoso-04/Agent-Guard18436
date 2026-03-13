@@ -25,6 +25,7 @@ import { chatHistoryStore } from '@extension/storage/lib/chat';
 import type { AgentStepHistory } from './history';
 import type { GeneralSettingsConfig } from '@extension/storage';
 import { analytics } from '../services/analytics';
+import { extractServiceFromTask, getExpectedDomainsForService } from '../services/phishing/credentialDomains';
 
 const logger = createLogger('Executor');
 
@@ -77,6 +78,21 @@ export class Executor {
       context: context,
       prompt: this.navigatorPrompt,
     });
+
+    // ── Credential Context Extraction (Issue 3.4) ────────────────────
+    const serviceName = extractServiceFromTask(task);
+    if (serviceName) {
+      const domains = getExpectedDomainsForService(serviceName);
+      if (domains.length > 0) {
+        context.credentialContext = {
+          taskId,
+          expectedDomains: domains,
+          credentialType: 'general',
+          extractedFrom: 'task_text',
+        };
+        logger.info(`Detected credential context for service: ${serviceName} -> [${domains.join(', ')}]`);
+      }
+    }
 
     this.planner = new PlannerAgent({
       chatLLM: plannerLLM,

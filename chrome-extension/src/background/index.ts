@@ -52,6 +52,20 @@ chrome.tabs.onRemoved.addListener(tabId => {
   browserContext.removeAttachedPage(tabId);
 });
 
+// ── Redirect Chain Auditor (Issue 3.3) ───────────────────────────────
+chrome.webNavigation.onCommitted.addListener(details => {
+  // Only track main frame navigations for the tab currently managed by browserContext
+  if (details.frameId === 0 && details.tabId) {
+     browserContext.recordNavigationHop(details.tabId, {
+        url: details.url,
+        domain: new URL(details.url).hostname, // Simplified, ETLD+1 could be more precise
+        timestamp: Date.now(),
+        transitionType: details.transitionType,
+        transitionQualifiers: details.transitionQualifiers,
+     });
+  }
+});
+
 logger.info('background loaded');
 
 // Initialize analytics
