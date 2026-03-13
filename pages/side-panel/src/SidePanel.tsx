@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RxDiscordLogo } from 'react-icons/rx';
 import { FiSettings } from 'react-icons/fi';
 import { PiPlusBold } from 'react-icons/pi';
 import { GrHistory } from 'react-icons/gr';
@@ -12,6 +11,7 @@ import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
 import SecurityBadge, { SecurityLevel } from './components/SecurityBadge';
+import SecurityEventStream, { type SecurityStreamEntry } from './components/SecurityEventStream';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import './SidePanel.css';
 
@@ -42,6 +42,7 @@ const SidePanel = () => {
   // Security badge state (Issue 1.5)
   const [securityLevel, setSecurityLevel] = useState<SecurityLevel>(SecurityLevel.NORMAL);
   const [securityDetectionCount, setSecurityDetectionCount] = useState(0);
+  const [securityEvents, setSecurityEvents] = useState<SecurityStreamEntry[]>([]);
   const sessionIdRef = useRef<string | null>(null);
   const isReplayingRef = useRef<boolean>(false);
   const portRef = useRef<chrome.runtime.Port | null>(null);
@@ -166,6 +167,7 @@ const SidePanel = () => {
               setIsHistoricalSession(false);
               setSecurityLevel(SecurityLevel.NORMAL);
               setSecurityDetectionCount(0);
+              setSecurityEvents([]);
               break;
             case ExecutionState.TASK_OK:
               setIsFollowUpMode(true);
@@ -195,18 +197,61 @@ const SidePanel = () => {
               // Payload encodes "level:count" e.g. "2:3".
               // Guard against malformed payloads with a length check and
               // explicit numeric bounds before applying the values.
+              if (!content) break;
               const parts = content.split(':');
               if (parts.length >= 2) {
                 const newLevel = parseInt(parts[0], 10) as SecurityLevel;
                 const newCount = parseInt(parts[1], 10);
                 if (!isNaN(newLevel) && newLevel >= SecurityLevel.NORMAL && newLevel <= SecurityLevel.CRITICAL) {
                   setSecurityLevel(newLevel);
+
+                  // Add to stream if level increased
+                  if (newLevel > securityLevel) {
+                    setSecurityEvents(prev => [
+                      ...prev.slice(-19),
+                      {
+                        id: `level-${Date.now()}`,
+                        timestamp: Date.now(),
+                        level: newLevel,
+                        message: `Security level escalated to ${SecurityLevel[newLevel]}`,
+                        state: ExecutionState.SECURITY_LEVEL_CHANGE,
+                      },
+                    ]);
+                  }
                 }
                 if (!isNaN(newCount) && newCount >= 0) {
                   setSecurityDetectionCount(newCount);
                 }
               }
               skip = true; // don't add a chat message for security events
+              break;
+            }
+            case ExecutionState.PHISHING_DETECTED: {
+              setSecurityEvents(prev => [
+                ...prev.slice(-19),
+                {
+                  id: `phish-${Date.now()}`,
+                  timestamp: Date.now(),
+                  level: SecurityLevel.HIGH,
+                  message: `Phishing Attempt: ${content}`,
+                  state: ExecutionState.PHISHING_DETECTED,
+                },
+              ]);
+              skip = true;
+              break;
+            }
+            case ExecutionState.TRUST_BOUNDARY_CROSSED: {
+              setSecurityEvents(prev => [
+                ...prev.slice(-19),
+                {
+                  id: `boundary-${Date.now()}`,
+                  timestamp: Date.now(),
+                  level: SecurityLevel.ELEVATED,
+                  message: content || 'Trust boundary crossed',
+                  state: ExecutionState.TRUST_BOUNDARY_CROSSED,
+                },
+              ]);
+              skip = true;
               break;
             }
             default:
@@ -1027,63 +1072,60 @@ const SidePanel = () => {
     <div>
       <div
         className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : "bg-[url('/bg.jpg')] bg-cover bg-no-repeat"} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[rgb(186,230,253)]'} rounded-2xl`}>
-        <header className="header relative">
+        <header className="header glass">
           <div className="header-logo">
             {showHistory ? (
               <button
                 type="button"
                 onClick={() => handleBackToChat(false)}
-                className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
+                className="header-icon"
                 aria-label={t('nav_back_a11y')}>
                 {t('nav_back')}
               </button>
             ) : (
-              <img src="/icon-128.png" alt="Extension Logo" className="size-6" />
+              <span>Agent Guard</span>
             )}
           </div>
           <div className="header-icons">
-            {/* Security level badge — only shows when threats have been detected */}
-            <SecurityBadge level={securityLevel} detectionCount={securityDetectionCount} />
+            <SecurityBadge
+              level={securityLevel}
+              detectionCount={securityDetectionCount}
+              eventSummary={securityEvents.map(e => e.message)}
+            />
             {!showHistory && (
               <>
                 <button
                   type="button"
                   onClick={handleNewChat}
-                  onKeyDown={e => e.key === 'Enter' && handleNewChat()}
-                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-                  aria-label={t('nav_newChat_a11y')}
-                  tabIndex={0}>
-                  <PiPlusBold size={20} />
+                  className="header-icon"
+                  aria-label={t('nav_newChat_a11y')}>
+                  <PiPlusBold size={18} />
                 </button>
                 <button
                   type="button"
                   onClick={handleLoadHistory}
-                  onKeyDown={e => e.key === 'Enter' && handleLoadHistory()}
-                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-                  aria-label={t('nav_loadHistory_a11y')}
-                  tabIndex={0}>
-                  <GrHistory size={20} />
+                  className="header-icon"
+                  aria-label={t('nav_loadHistory_a11y')}>
+                  <GrHistory size={18} />
                 </button>
               </>
             )}
-            <a
-              href="https://discord.gg/NN3ABHggMK"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'}`}>
-              <RxDiscordLogo size={20} />
-            </a>
+
             <button
               type="button"
               onClick={() => chrome.runtime.openOptionsPage()}
-              onKeyDown={e => e.key === 'Enter' && chrome.runtime.openOptionsPage()}
-              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-              aria-label={t('nav_settings_a11y')}
-              tabIndex={0}>
-              <FiSettings size={20} />
+              className="header-icon"
+              aria-label={t('nav_settings_a11y')}>
+              <FiSettings size={18} />
             </button>
           </div>
         </header>
+        {!showHistory && (
+          <SecurityEventStream
+            events={securityEvents}
+            onClear={id => (id ? setSecurityEvents(prev => prev.filter(e => e.id !== id)) : setSecurityEvents([]))}
+          />
+        )}
         {showHistory ? (
           <div className="flex-1 overflow-hidden">
             <ChatHistoryList
@@ -1110,38 +1152,15 @@ const SidePanel = () => {
 
             {/* Show setup message when no models are configured */}
             {hasConfiguredModels === false && (
-              <div
-                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
+              <div className="flex flex-1 items-center justify-center p-8">
                 <div className="max-w-md text-center">
-                  <img src="/icon-128.png" alt="Nanobrowser Logo" className="mx-auto mb-4 size-12" />
-                  <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-sky-700'}`}>
-                    {t('welcome_title')}
-                  </h3>
-                  <p className="mb-4">{t('welcome_instruction')}</p>
+                  <h3 className="mb-2 text-2xl font-bold font-['Outfit']">{t('welcome_title')}</h3>
+                  <p className="mb-4 text-gray-500">{t('welcome_instruction')}</p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
-                    className={`my-4 rounded-lg px-4 py-2 font-medium transition-colors ${
-                      isDarkMode ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-sky-500 text-white hover:bg-sky-600'
-                    }`}>
+                    className="my-4 rounded-full bg-apple-blue px-8 py-3 font-semibold text-white transition-all hover:scale-105 active:scale-95 shadow-lg">
                     {t('welcome_openSettings')}
                   </button>
-                  <div className="mt-4 text-sm opacity-75">
-                    <a
-                      href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      {t('welcome_quickStart')}
-                    </a>
-                    <span className="mx-2">•</span>
-                    <a
-                      href="https://discord.gg/NN3ABHggMK"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      {t('welcome_joinCommunity')}
-                    </a>
-                  </div>
                 </div>
               </div>
             )}
@@ -1150,9 +1169,8 @@ const SidePanel = () => {
             {hasConfiguredModels === true && (
               <>
                 {messages.length === 0 && (
-                  <>
-                    <div
-                      className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-sky-100'} mb-2 p-2 shadow-sm backdrop-blur-sm`}>
+                  <div className="flex flex-1 flex-col">
+                    <div className="input-container">
                       <ChatInput
                         onSendMessage={handleSendMessage}
                         onStopTask={handleStopTask}
@@ -1179,18 +1197,16 @@ const SidePanel = () => {
                         isDarkMode={isDarkMode}
                       />
                     </div>
-                  </>
+                  </div>
                 )}
                 {messages.length > 0 && (
-                  <div
-                    className={`scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-scroll scroll-smooth p-2 ${isDarkMode ? 'bg-slate-900/80' : ''}`}>
+                  <div className="scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-scroll scroll-smooth p-4">
                     <MessageList messages={messages} isDarkMode={isDarkMode} />
                     <div ref={messagesEndRef} />
                   </div>
                 )}
                 {messages.length > 0 && (
-                  <div
-                    className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-sky-100'} p-2 shadow-sm backdrop-blur-sm`}>
+                  <div className="input-container">
                     <ChatInput
                       onSendMessage={handleSendMessage}
                       onStopTask={handleStopTask}
