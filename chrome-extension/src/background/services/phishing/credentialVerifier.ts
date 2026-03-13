@@ -52,7 +52,7 @@ export class CredentialVerifier {
     }
 
     // Check for lookalikes against expected domains
-    for (const expected of context.expectedDomains) {
+    for (const _expected of context.expectedDomains) {
        const score = domainScorer.scoreDomain(hostname);
        // If hostname is a lookalike of ANY top domain or specifically our expected domain
        if (score.risk === 'critical' || score.risk === 'high') {

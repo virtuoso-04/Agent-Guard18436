@@ -1,5 +1,5 @@
-import { PhishingSignalType, PhishingSignal, URGENCY_PATTERNS, BRAND_DOMAINS } from './signals';
-import { type BrowserState } from '@src/background/browser/views';
+import { PhishingSignalType, type PhishingSignal, URGENCY_PATTERNS, BRAND_DOMAINS } from './signals';
+import { type BrowserState, type DOMElementNode } from '@src/background/browser/views';
 
 export interface PhishingPageScore {
   score: number;
@@ -15,7 +15,7 @@ export class PageAnalyzer {
 
     // Detect Credential Form on HTTP
     if (url.startsWith('http://') && !url.startsWith('http://localhost') && !url.startsWith('http://127.0.0.1')) {
-      const hasPasswordField = Array.from(state.selectorMap.values()).some((el: any) => el.tagName === 'input' && el.attributes?.type === 'password');
+      const hasPasswordField = Array.from(state.selectorMap.values()).some((el: DOMElementNode) => el.tagName === 'input' && el.attributes?.type === 'password');
       if (hasPasswordField) {
         signals.push({
           type: PhishingSignalType.CREDENTIAL_FORM_ON_HTTP,
@@ -26,7 +26,7 @@ export class PageAnalyzer {
     }
 
     // Domain-Title mismatch
-    const title = (state as any).title || '';
+    const title = state.title || '';
     for (const [brand, domains] of Object.entries(BRAND_DOMAINS)) {
       if (title.toLowerCase().includes(brand.toLowerCase())) {
         const isMatch = domains.some(d => hostname.endsWith(d));
@@ -41,7 +41,6 @@ export class PageAnalyzer {
     }
 
     // Urgency language scan
-    // We assume the BrowserState includes some text content or we can scan the selectorMap
     const allText = Array.from(state.selectorMap.values()).map(el => (el as any).text || '').join(' ');
     for (const pattern of URGENCY_PATTERNS) {
       if (pattern.test(allText)) {
@@ -55,11 +54,12 @@ export class PageAnalyzer {
 
     // Excessive hidden fields
     let hiddenCount = 0;
-    state.selectorMap.forEach((el: any) => {
-      if (el.tagName === 'input' && (el as any).type === 'hidden') {
+    state.selectorMap.forEach((el: DOMElementNode) => {
+      if (el.tagName === 'input' && el.attributes?.type === 'hidden') {
         hiddenCount++;
       }
     });
+
     if (hiddenCount > 20) {
       signals.push({
         type: PhishingSignalType.EXCESSIVE_HIDDEN_FIELDS,
@@ -75,10 +75,9 @@ export class PageAnalyzer {
     }
 
     // Suspicious form target
-    // Note: BrowserState selectorMap values might not always have 'action' attribute unless specifically extracted
-    state.selectorMap.forEach((el: any) => {
+    state.selectorMap.forEach((el: DOMElementNode) => {
       if (el.tagName === 'form') {
-         const action = (el as any).attributes?.action;
+         const action = el.attributes?.action;
          if (action && action.startsWith('http')) {
             try {
                const actionHostname = new URL(action).hostname;
@@ -90,7 +89,7 @@ export class PageAnalyzer {
                   });
                }
             } catch (e) {
-               // ignore invalid URLs
+               // ignore
             }
          }
       }

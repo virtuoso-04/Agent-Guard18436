@@ -178,7 +178,7 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
 
       // ── Phishing Detection (Issue 3.1 & 3.2) ─────────────────────────
       if (currentState) {
-        const url = (currentState as any).url || '';
+        const url = currentState.url;
         const domainResult = domainScorer.scoreDomain(url);
         const pageResult = await pageAnalyzer.analyze(currentState, url);
 
@@ -238,7 +238,7 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       }
 
       // ── Redirect Chain Audit (Issue 3.3) ──────────────────────────
-      const tabId = (currentState as any).tabId;
+      const tabId = currentState.tabId;
       if (tabId) {
         const chain = this.context.browserContext.getNavigationChain(tabId);
         if (chain) {

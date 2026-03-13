@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { domainScorer } from '../domainScorer';
 import { pageAnalyzer } from '../pageAnalyzer';
 import { redirectAuditor } from '../redirectAuditor';
@@ -10,7 +10,7 @@ describe('Phase 3: Phishing Detection Integration', () => {
 
   it('Scenario 1: Fake PayPal Login (Lookalike + Credential Form)', async () => {
     const url = 'https://paypa1.com/login';
-    const state: BrowserState = {
+    const state = {
       url,
       title: 'Log in to your PayPal account',
       tabId: 1,
@@ -24,7 +24,7 @@ describe('Phase 3: Phishing Detection Integration', () => {
         [1, { tagName: 'input', attributes: { type: 'password', name: 'password' } } as any],
         [2, { tagName: 'form', attributes: { action: 'https://evil-server.com/collect' } } as any]
       ])
-    };
+    } as unknown as BrowserState;
 
     // 1. Domain Scorer
     const domainResult = domainScorer.scoreDomain(url);
@@ -70,7 +70,7 @@ describe('Phase 3: Phishing Detection Integration', () => {
 
   it('Scenario 3: Credential Form on HTTP', async () => {
     const url = 'http://my-secure-bank.com/login';
-    const state: BrowserState = {
+    const state = {
         url,
         title: 'Bank Login',
         tabId: 1,
@@ -83,7 +83,7 @@ describe('Phase 3: Phishing Detection Integration', () => {
         selectorMap: new Map([
           [1, { tagName: 'input', attributes: { type: 'password' } } as any]
         ])
-    };
+    } as unknown as BrowserState;
 
     const pageResult = await pageAnalyzer.analyze(state, url);
     expect(pageResult.risk).toBe('critical'); // Password form on HTTP

@@ -1,4 +1,4 @@
-import { domainScorer, DomainTrustScore } from '../services/phishing/domainScorer';
+import { domainScorer, type DomainTrustScore } from '../services/phishing/domainScorer';
 
 /**
  * Checks if a URL is allowed based on firewall configuration
