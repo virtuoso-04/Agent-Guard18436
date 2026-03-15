@@ -1,5 +1,5 @@
 {
-  "extends": "@extension/tsconfig/app",
+  "extends": "@agent-guard/tsconfig/app",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

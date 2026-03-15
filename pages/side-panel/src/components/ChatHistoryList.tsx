@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { FaTrash } from 'react-icons/fa';
 import { BsBookmark } from 'react-icons/bs';
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 
 interface ChatSession {
   id: string;
@@ -40,22 +40,24 @@ const ChatHistoryList: React.FC<ChatHistoryListProps> = ({
       </h2>
       {sessions.length === 0 ? (
         <div
-          className={`rounded-lg ${isDarkMode ? 'bg-slate-800 text-gray-400' : 'bg-white/30 text-gray-500'} p-4 text-center backdrop-blur-sm`}>
+          className={`rounded-2xl ${isDarkMode ? 'bg-slate-800/40 text-slate-400' : 'bg-white/40 text-slate-500'} p-8 text-center backdrop-blur-md border border-slate-200/20`}>
           {t('chat_history_empty')}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {sessions.map(session => (
             <div
               key={session.id}
-              className={`group relative rounded-lg ${
-                isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white/50 hover:bg-white/70'
-              } p-3 backdrop-blur-sm transition-all`}>
+              className={`group relative rounded-2xl ${
+                isDarkMode
+                  ? 'bg-slate-800/60 hover:bg-slate-700/80 border-slate-700/50'
+                  : 'bg-white/60 hover:bg-white/80 border-slate-200/60'
+              } p-4 backdrop-blur-md transition-all border shadow-sm`}>
               <button onClick={() => onSessionSelect(session.id)} className="w-full text-left" type="button">
-                <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                <h3 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                   {session.title}
                 </h3>
-                <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className={`mt-1 text-xs font-medium ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                   {formatDate(session.createdAt)}
                 </p>
               </button>

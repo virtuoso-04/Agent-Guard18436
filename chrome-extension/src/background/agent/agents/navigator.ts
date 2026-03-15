@@ -28,9 +28,10 @@ import { convertZodToJsonSchema, repairJsonString } from '@src/background/utils'
 import { HistoryTreeProcessor } from '@src/background/browser/dom/history/service';
 import { AgentStepRecord } from '../history';
 import { type DOMHistoryElement } from '@src/background/browser/dom/history/view';
-import { domainScorer } from '../../services/phishing/domainScorer';
-import { pageAnalyzer } from '../../services/phishing/pageAnalyzer';
-import { redirectAuditor } from '../../services/phishing/redirectAuditor';
+import { recordDetection } from '@src/background/services/security/content/securityState';
+import { domainScorer } from '../../services/security/network/domainScorer';
+import { pageAnalyzer } from '../../services/security/network/pageAnalyzer';
+import { redirectAuditor } from '../../services/security/network/redirectAuditor';
 
 const logger = createLogger('NavigatorAgent');
 
@@ -183,12 +184,41 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         const pageResult = await pageAnalyzer.analyze(currentState, url);
 
         const finalRisk = domainResult.score < pageResult.score ? domainResult.risk : pageResult.risk;
-        
+
         if (finalRisk === 'critical' || finalRisk === 'high') {
           const detail = `Phishing detected! Domain Risk: ${domainResult.risk}, Page Signals: ${pageResult.signals.map(s => s.type).join(', ')}`;
           logger.info(detail);
+
+          // ── Escalating Security State (Phase 3) ──────────────────────
+          this.context.securityState = recordDetection(
+            this.context.securityState,
+            `phish-${this.context.nSteps}`,
+            finalRisk === 'critical',
+          );
+
           this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.PHISHING_DETECTED, detail);
-          
+          this.context.emitEvent(
+            Actors.SYSTEM,
+            ExecutionState.SECURITY_LEVEL_CHANGE,
+            `${this.context.securityState.level}:${this.context.securityState.injectionCount}`,
+          );
+
+          // ── Audit Logging (Phase 4) ──────────────────────────────────
+          if (this.context.auditLogger) {
+            void this.context.auditLogger.logThreat({
+              sessionId: this.context.taskId,
+              taskId: this.context.taskId,
+              stepNumber: this.context.nSteps,
+              sourceUrl: url,
+              threatType: 'dangerous_action', // phishing falls under dangerous action/site
+              severity: finalRisk === 'critical' ? 'critical' : 'high',
+              rawFragment: `URL: ${url}`,
+              sanitizedFragment: `BLOCKED: ${detail}`,
+              wasBlocked: finalRisk === 'critical',
+              detectionLayer: 'phishing_detector', // IPPD / Phishing detector layer
+            });
+          }
+
           if (finalRisk === 'critical') {
             logger.info('⛔ Critical phishing risk — pausing task for user review');
             this.context.pause();
@@ -242,7 +272,10 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       if (tabId) {
         const chain = this.context.browserContext.getNavigationChain(tabId);
         if (chain) {
-          const auditResult = await redirectAuditor.auditChain(chain, this.context.browserContext.getConfig().allowedUrls);
+          const auditResult = await redirectAuditor.auditChain(
+            chain,
+            this.context.browserContext.getConfig().allowedUrls,
+          );
           if (auditResult.crossedTrustBoundary) {
             logger.info('Trust boundary crossed!', auditResult.reason);
             this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.TRUST_BOUNDARY_CROSSED, auditResult.reason);

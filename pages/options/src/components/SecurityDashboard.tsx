@@ -9,8 +9,8 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { threatLogStore } from '@extension/storage';
-import type { ThreatEvent } from '@extension/storage/lib/security/types';
+import { threatLogStore } from '@agent-guard/storage';
+import type { ThreatEvent } from '@agent-guard/storage/lib/security/types';
 import { FiShield, FiTrendingUp, FiGlobe, FiZap, FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
 
 interface SecurityDashboardProps {
@@ -128,7 +128,7 @@ export const SecurityDashboard = ({ isDarkMode = false }: SecurityDashboardProps
   const sanitizedCount = events.length - blockedCount;
 
   // Unique sessions
-  const sessionCount = useMemo(() => new Set(events.map(e => e.sessionId)).size, [events]);
+  const sessionCount = new Set(events.map(e => e.sessionId)).size;
 
   return (
     <div className="animate-in fade-in space-y-6 duration-700">

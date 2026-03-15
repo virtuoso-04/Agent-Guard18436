@@ -1,5 +1,5 @@
 {
-  "name": "@extension/dev-utils",
+  "name": "@agent-guard/dev-utils",
   "version": "0.1.13",
   "description": "chrome extension - dev utils",
   "private": true,
@@ -22,7 +22,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@extension/tsconfig": "workspace:*",
-    "@extension/shared": "workspace:*"
+    "@agent-guard/tsconfig": "workspace:*",
+    "@agent-guard/shared": "workspace:*"
   }
 }

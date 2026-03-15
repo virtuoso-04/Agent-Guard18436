@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 
 interface ChatInputProps {
   onSendMessage: (text: string, displayText?: string) => void;
@@ -91,14 +91,14 @@ export default function ChatInput({
           const fileContents = attachedFiles
             .map(file => {
               // Tag file content for background service to identify and sanitize
-              return `\n\n<nano_file_content type="file" name="${file.name}">\n${file.content}\n</nano_file_content>`;
+              return `\n\n<guard_file_content type="file" name="${file.name}">\n${file.content}\n</guard_file_content>`;
             })
             .join('\n');
 
           // Combine user message with tagged file content (for background service)
           messageContent = trimmedText
-            ? `${trimmedText}\n\n<nano_attached_files>${fileContents}</nano_attached_files>`
-            : `<nano_attached_files>${fileContents}</nano_attached_files>`;
+            ? `${trimmedText}\n\n<guard_attached_files>${fileContents}</guard_attached_files>`
+            : `<guard_attached_files>${fileContents}</guard_attached_files>`;
 
           // Create display version with only filenames (for UI)
           const fileList = attachedFiles.map(file => `📎 ${file.name}`).join('\n');
@@ -185,146 +185,102 @@ export default function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`overflow-hidden rounded-lg border transition-colors ${disabled ? 'cursor-not-allowed' : 'focus-within:border-sky-400 hover:border-sky-400'} ${isDarkMode ? 'border-slate-700' : ''}`}
+      className={`relative ${disabled ? 'opacity-50' : ''}`}
       aria-label={t('chat_input_form')}>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         {/* File attachments display */}
         {attachedFiles.length > 0 && (
-          <div
-            className={`flex flex-wrap gap-2 border-b p-2 ${
-              isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'
-            }`}>
+          <div className="flex flex-wrap gap-2 px-2">
             {attachedFiles.map((file, index) => (
               <div
                 key={index}
-                className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs ${
-                  isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'
+                className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs glass ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}>
-                <span className="text-xs">📎</span>
-                <span className="max-w-[150px] truncate">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveFile(index)}
-                  className={`ml-1 rounded-sm transition-colors ${
-                    isDarkMode ? 'hover:bg-slate-600' : 'hover:bg-gray-300'
-                  }`}
-                  aria-label={`Remove ${file.name}`}>
-                  <span className="text-xs">✕</span>
+                <span>📎</span>
+                <span className="max-w-[120px] truncate">{file.name}</span>
+                <button type="button" onClick={() => handleRemoveFile(index)} className="ml-1 hover:text-red-500">
+                  ✕
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={handleTextChange}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          aria-disabled={disabled}
-          rows={5}
-          className={`w-full resize-none border-none p-2 focus:outline-none ${
-            disabled
-              ? isDarkMode
-                ? 'cursor-not-allowed bg-slate-800 text-gray-400'
-                : 'cursor-not-allowed bg-gray-100 text-gray-500'
-              : isDarkMode
-                ? 'bg-slate-800 text-gray-200'
-                : 'bg-white'
-          }`}
-          placeholder={attachedFiles.length > 0 ? 'Add a message (optional)...' : t('chat_input_placeholder')}
-          aria-label={t('chat_input_editor')}
-        />
+        <div className="input-box bg-white/70 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={handleFileSelect}
+            disabled={disabled}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-guard-primary transition-colors">
+            <span className="text-xl">+</span>
+          </button>
 
-        <div
-          className={`flex items-center justify-between px-2 py-1.5 ${
-            disabled ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-100') : isDarkMode ? 'bg-slate-800' : 'bg-white'
-          }`}>
-          <div className="flex gap-2 text-gray-500">
-            {/* File attachment button */}
-            <button
-              type="button"
-              onClick={handleFileSelect}
-              disabled={disabled}
-              aria-label="Attach files"
-              title="Attach text files (txt, md, json, csv, etc.)"
-              className={`rounded-md p-1.5 transition-colors ${
-                disabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : isDarkMode
-                    ? 'text-gray-400 hover:bg-slate-700 hover:text-gray-200'
-                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-              }`}>
-              <span className="text-lg">📎</span>
-            </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".txt,.md,.markdown,.json,.csv,.log,.xml,.yaml,.yml"
+            onChange={handleFileChange}
+            className="hidden"
+            aria-hidden="true"
+          />
 
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept=".txt,.md,.markdown,.json,.csv,.log,.xml,.yaml,.yml"
-              onChange={handleFileChange}
-              className="hidden"
-              aria-hidden="true"
-            />
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleTextChange}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            rows={1}
+            className="chat-input scrollbar-none"
+            placeholder={attachedFiles.length > 0 ? 'Add a message...' : t('chat_input_placeholder')}
+          />
 
+          <div className="flex items-center gap-2 pr-1">
             {onMicClick && (
               <button
                 type="button"
                 onClick={onMicClick}
                 disabled={disabled || isProcessingSpeech}
-                aria-label={
-                  isProcessingSpeech
-                    ? t('chat_stt_processing')
-                    : isRecording
-                      ? t('chat_stt_recording_stop')
-                      : t('chat_stt_input_start')
-                }
-                className={`rounded-md p-1.5 transition-colors ${
-                  disabled || isProcessingSpeech
-                    ? 'cursor-not-allowed opacity-50'
-                    : isRecording
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : isDarkMode
-                        ? 'text-gray-400 hover:bg-slate-700 hover:text-gray-200'
-                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                  isRecording ? 'bg-critical-red text-white' : 'text-guard-muted hover:bg-guard-surface'
                 }`}>
                 {isProcessingSpeech ? (
                   <AiOutlineLoading3Quarters className="size-4 animate-spin" />
                 ) : (
-                  <FaMicrophone className={`size-4 ${isRecording ? 'animate-pulse' : ''}`} />
+                  <FaMicrophone className={isRecording ? 'animate-pulse' : ''} />
                 )}
               </button>
             )}
-          </div>
 
-          {showStopButton ? (
-            <button
-              type="button"
-              onClick={onStopTask}
-              className="rounded-md bg-red-500 px-3 py-1 text-white transition-colors hover:bg-red-600">
-              {t('chat_buttons_stop')}
-            </button>
-          ) : historicalSessionId ? (
-            <button
-              type="button"
-              onClick={handleReplay}
-              disabled={!historicalSessionId}
-              aria-disabled={!historicalSessionId}
-              className={`rounded-md bg-green-500 px-3 py-1 text-white transition-colors hover:enabled:bg-green-600 ${!historicalSessionId ? 'cursor-not-allowed opacity-50' : ''}`}>
-              {t('chat_buttons_replay')}
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={isSendButtonDisabled}
-              aria-disabled={isSendButtonDisabled}
-              className={`rounded-md bg-[#19C2FF] px-3 py-1 text-white transition-colors hover:enabled:bg-[#0073DC] ${isSendButtonDisabled ? 'cursor-not-allowed opacity-50' : ''}`}>
-              {t('chat_buttons_send')}
-            </button>
-          )}
+            {showStopButton ? (
+              <button
+                type="button"
+                onClick={onStopTask}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-critical-red text-white">
+                ■
+              </button>
+            ) : historicalSessionId ? (
+              <button
+                type="button"
+                onClick={handleReplay}
+                className="flex h-8 px-4 items-center justify-center rounded-full bg-safe-green text-white font-medium text-sm transition-transform hover:scale-105">
+                {t('chat_buttons_replay')}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSendButtonDisabled}
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                  isSendButtonDisabled
+                    ? 'bg-guard-muted opacity-30'
+                    : 'bg-guard-primary text-white shadow-lg hover:scale-110 active:scale-95'
+                }`}>
+                ↑
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </form>

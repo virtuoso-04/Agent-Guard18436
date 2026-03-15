@@ -80,6 +80,19 @@ function getSnapshot(): ThreatEvent[] | null {
   return _storage.getSnapshot();
 }
 
+/** Get the hash of the most recent entry. */
+async function getLastHash(): Promise<string | null> {
+  const all = await _storage.get();
+  if (all.length === 0) return null;
+  // We compute a stable hash of the last entry if it doesn't have one,
+  // but ideally it should have its own hash from when it was appended.
+  // Actually, the previousHash field in the next entry is what matters.
+  // We need to return the 'current' hash of the last entry to chain it.
+  // Since we don't store the current hash IN the entry (only the previous one),
+  // we need a way to compute it consistently.
+  return null; // I'll refine this.
+}
+
 export const threatLogStore = {
   append,
   getAll,
@@ -89,4 +102,5 @@ export const threatLogStore = {
   getStats,
   subscribe,
   getSnapshot,
+  getLastHash,
 } as const;

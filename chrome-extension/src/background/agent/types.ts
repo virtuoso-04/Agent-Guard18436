@@ -6,8 +6,9 @@ import type MessageManager from './messages/service';
 import type { EventManager } from './event/manager';
 import { type Actors, type ExecutionState, AgentEvent } from './event/types';
 import { AgentStepHistory } from './history';
-import { type TaskSecurityState, createSecurityState } from '../services/guardrails/securityState';
-import { type CredentialContext } from '../services/phishing/credentialVerifier';
+import { type TaskSecurityState, createSecurityState } from '../services/security/content/securityState';
+import { type CredentialContext } from '../services/security/network/credentialVerifier';
+import { type AuditLogger } from '../services/security/content/auditLogger';
 
 export interface AgentOptions {
   maxSteps: number;
@@ -55,6 +56,10 @@ export class AgentContext {
   securityState: TaskSecurityState;
   /** Credential context for the current task (Issue 3.4) */
   credentialContext: CredentialContext | null;
+  /** Per-task session key for message and log signing */
+  sessionKey: CryptoKey | null;
+  /** Audit logger for the current task */
+  auditLogger: AuditLogger | null;
 
   constructor(
     taskId: string,
@@ -81,6 +86,8 @@ export class AgentContext {
     this.finalAnswer = null;
     this.securityState = createSecurityState();
     this.credentialContext = null;
+    this.sessionKey = null;
+    this.auditLogger = null;
   }
 
   async emitEvent(actor: Actors, state: ExecutionState, eventDetails: string) {

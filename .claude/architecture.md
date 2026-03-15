@@ -10,17 +10,17 @@ Agent-Guard18436/
 │   ├── options/               # Settings page (React)
 │   └── content/               # Content script injected into web pages
 ├── packages/
-│   ├── storage/               # @extension/storage — Chrome storage abstraction
-│   ├── i18n/                  # @extension/i18n — Internationalization
-│   ├── shared/                # @extension/shared — HOCs, hooks, utility types
-│   ├── ui/                    # @extension/ui — Shared React components
-│   ├── schema-utils/          # @extension/schema-utils — Zod helpers
-│   ├── vite-config/           # @extension/vite-config — Shared Vite config
-│   ├── tailwind-config/       # @extension/tailwind-config — Shared Tailwind
-│   ├── tsconfig/              # @extension/tsconfig — TS config bases
-│   ├── hmr/                   # @extension/hmr — Hot module replacement
-│   ├── dev-utils/             # @extension/dev-utils — Manifest parser
-│   └── zipper/                # @extension/zipper — ZIP bundler
+│   ├── storage/               # @agent-guard/storage — Chrome storage abstraction
+│   ├── i18n/                  # @agent-guard/i18n — Internationalization
+│   ├── shared/                # @agent-guard/shared — HOCs, hooks, utility types
+│   ├── ui/                    # @agent-guard/ui — Shared React components
+│   ├── schema-utils/          # @agent-guard/schema-utils — Zod helpers
+│   ├── vite-config/           # @agent-guard/vite-config — Shared Vite config
+│   ├── tailwind-config/       # @agent-guard/tailwind-config — Shared Tailwind
+│   ├── tsconfig/              # @agent-guard/tsconfig — TS config bases
+│   ├── hmr/                   # @agent-guard/hmr — Hot module replacement
+│   ├── dev-utils/             # @agent-guard/dev-utils — Manifest parser
+│   └── zipper/                # @agent-guard/zipper — ZIP bundler
 ├── turbo.json                 # Build task graph
 ├── pnpm-workspace.yaml        # Workspace roots
 └── package.json               # Root scripts
@@ -267,7 +267,7 @@ Key naming: `{prefix}_{component}_{action}_{state}`
 - States: `_start`, `_ok`, `_fail`, `_cancel`, `_pause`
 
 ```typescript
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 t('act_click_ok')
 t('act_goToUrl_start', ['https://example.com'])
 ```

@@ -1,6 +1,6 @@
-# Contributing to NanoBrowser
+# Contributing to Agent Guard
 
-We deeply appreciate your interest in contributing to NanoBrowser! Every contribution helps make Nanobrowser more powerful and accessible for everyone.
+We deeply appreciate your interest in contributing to Agent Guard! Every contribution helps make Agent Guard more powerful and accessible for everyone.
 
 ## Quick Start
 

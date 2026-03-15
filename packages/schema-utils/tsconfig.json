@@ -1,5 +1,5 @@
 {
-  "extends": "@extension/tsconfig/base.json",
+  "extends": "@agent-guard/tsconfig/base.json",
   "include": ["./**/*.ts", "./**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

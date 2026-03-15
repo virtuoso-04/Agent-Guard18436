@@ -1,4 +1,5 @@
-import type { DOMState } from './dom/views';
+import { type DOMState, DOMElementNode, DOMBaseNode } from './dom/views';
+export { type DOMState, DOMElementNode, DOMBaseNode };
 import type { DOMHistoryElement } from './dom/history/view';
 
 export interface BrowserContextWindowSize {

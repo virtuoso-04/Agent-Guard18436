@@ -7,7 +7,7 @@ import { createLogger } from '@src/background/log';
 import type { Action } from '../actions/builder';
 import { convertInputMessages, extractJsonFromModelOutput, removeThinkTags } from '../messages/utils';
 import { isAbortedError, ResponseParseError } from './errors';
-import { ProviderTypeEnum } from '@extension/storage';
+import { ProviderTypeEnum } from '@agent-guard/storage';
 
 const logger = createLogger('agent');
 

@@ -8,7 +8,7 @@
  */
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { KeyboardEvent } from 'react';
-import { Button } from '@extension/ui';
+import { Button } from '@agent-guard/ui';
 import {
   llmProviderStore,
   agentModelStore,
@@ -20,8 +20,8 @@ import {
   getDefaultProviderConfig,
   getDefaultAgentModelParams,
   type ProviderConfig,
-} from '@extension/storage';
-import { t } from '@extension/i18n';
+} from '@agent-guard/storage';
+import { t } from '@agent-guard/i18n';
 
 // Helper function to check if a model is an OpenAI reasoning model (O-series or GPT-5 models)
 function isOpenAIReasoningModel(modelName: string): boolean {
@@ -1125,17 +1125,52 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
   };
 
   return (
-    <section className="space-y-6">
-      {/* LLM Providers Section */}
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          {t('options_models_providers_header')}
-        </h2>
+    <section className="space-y-8 pb-12">
+      {/* API Key Configuration Section */}
+      <div className="settings-card">
+        <div className="flex items-center justify-between mb-8 border-b pb-4">
+          <div>
+            <h2 className="text-lg font-bold">API Providers</h2>
+            <p className="text-sm opacity-60">Manage your LLM provider credentials and endpoints.</p>
+          </div>
+          <div className="provider-selector-container relative">
+            <button
+              onClick={() => setIsProviderSelectorOpen(prev => !prev)}
+              className="px-4 py-2 rounded-xl bg-guard-primary text-white text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-all active:scale-95">
+              + Add Provider
+            </button>
+            {isProviderSelectorOpen && (
+              <div className="absolute right-0 mt-2 w-64 glass rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-2 space-y-1">
+                  {Object.values(ProviderTypeEnum)
+                    .filter(
+                      type =>
+                        type === ProviderTypeEnum.AzureOpenAI ||
+                        (!providersFromStorage.has(type) && !modifiedProviders.has(type)),
+                    )
+                    .map(type => (
+                      <button
+                        key={type}
+                        className="w-full text-left px-4 py-3 text-xs font-medium hover:bg-guard-primary hover:text-white rounded-xl transition-colors"
+                        onClick={() => handleProviderSelection(type)}>
+                        {getDefaultDisplayNameFromProviderId(type)}
+                      </button>
+                    ))}
+                  <button
+                    className="w-full text-left px-4 py-3 text-xs font-medium hover:bg-guard-primary hover:text-white rounded-xl transition-colors border-t border-apple-border mt-1"
+                    onClick={() => handleProviderSelection(ProviderTypeEnum.CustomOpenAI)}>
+                    OpenAI Compatible
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="space-y-6">
-          {getSortedProviders().length === 0 ? (
-            <div className="py-8 text-center text-gray-500">
-              <p className="mb-4">{t('options_models_providers_notConfigured')}</p>
+          {Object.keys(providers).length === 0 ? (
+            <div className="py-12 text-center opacity-40">
+              <p className="text-sm italic">No providers configured. Add one to get started.</p>
             </div>
           ) : (
             getSortedProviders().map(([providerId, providerConfig]) => {
@@ -1622,12 +1657,11 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
       </div>
 
       {/* Updated Agent Models Section */}
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-left text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          {t('options_models_selection_header')}
+      <div className="settings-card">
+        <h2 className="text-lg font-bold mb-6 border-b pb-2 uppercase tracking-widest opacity-40">
+          Agent Mission Control
         </h2>
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[AgentNameEnum.Planner, AgentNameEnum.Navigator].map(agentName => (
             <div key={agentName}>{renderModelSelect(agentName)}</div>
           ))}

@@ -1,6 +1,6 @@
-# Extending Nanobrowser — Patterns & Recipes
+# Extending Agent Guard — Patterns & Recipes
 
-This doc covers the concrete patterns to follow when building new capabilities on top of Nanobrowser.
+This doc covers the concrete patterns to follow when building new capabilities on top of Agent Guard.
 
 ---
 

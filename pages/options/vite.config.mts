@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { withPageConfig } from '@extension/vite-config';
+import { withPageConfig } from '@agent-guard/vite-config';
 
 const rootDir = resolve(__dirname);
 const srcDir = resolve(rootDir, 'src');

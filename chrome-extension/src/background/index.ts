@@ -6,8 +6,8 @@ import {
   generalSettingsStore,
   llmProviderStore,
   analyticsSettingsStore,
-} from '@extension/storage';
-import { t } from '@extension/i18n';
+} from '@agent-guard/storage';
+import { t } from '@agent-guard/i18n';
 import BrowserContext from './browser/context';
 import { Executor } from './agent/executor';
 import { createLogger } from './log';
@@ -56,13 +56,13 @@ chrome.tabs.onRemoved.addListener(tabId => {
 chrome.webNavigation.onCommitted.addListener(details => {
   // Only track main frame navigations for the tab currently managed by browserContext
   if (details.frameId === 0 && details.tabId) {
-     browserContext.recordNavigationHop(details.tabId, {
-        url: details.url,
-        domain: new URL(details.url).hostname, // Simplified, ETLD+1 could be more precise
-        timestamp: Date.now(),
-        transitionType: details.transitionType,
-        transitionQualifiers: details.transitionQualifiers,
-     });
+    browserContext.recordNavigationHop(details.tabId, {
+      url: details.url,
+      domain: new URL(details.url).hostname, // Simplified, ETLD+1 could be more precise
+      timestamp: Date.now(),
+      transitionType: details.transitionType,
+      transitionQualifiers: details.transitionQualifiers,
+    });
   }
 });
 

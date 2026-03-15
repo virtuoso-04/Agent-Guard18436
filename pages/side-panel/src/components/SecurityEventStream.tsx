@@ -32,15 +32,29 @@ export default function SecurityEventStream({ events, onClear }: SecurityEventSt
 
   // Only show the last 3 events to keep it tidy
   const displayEvents = events.slice(-3);
+  const streamRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (streamRef.current) {
+      streamRef.current.scrollTop = streamRef.current.scrollHeight;
+    }
+  }, [displayEvents]);
 
   return (
-    <div id="security-event-stream">
-      <div className="flex flex-col items-center">
+    <div id="security-event-stream" role="log" aria-live="polite" aria-label="Security notifications">
+      <div ref={streamRef} className="flex flex-col items-center" tabIndex={-1}>
         {displayEvents.map((event, index) => (
-          <div key={event.id} className={`security-toast ${index === displayEvents.length - 1 ? 'new' : ''}`}>
+          <div
+            key={event.id}
+            className={`security-toast ${index === displayEvents.length - 1 ? 'new' : ''}`}
+            role="status"
+            aria-live="polite">
             <div className={`h-2 w-2 rounded-full ${LEVEL_COLORS[event.level] || 'bg-blue-500'}`} />
             <span className="text-xs font-medium tracking-tight">{event.message}</span>
-            <button onClick={() => onClear(event.id)} className="ml-2 text-[10px] opacity-30 hover:opacity-100">
+            <button
+              onClick={() => onClear(event.id)}
+              className="ml-2 text-[10px] opacity-30 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-primary"
+              aria-label="Dismiss security event">
               ✕
             </button>
           </div>

@@ -18,8 +18,8 @@ To run these examples:
 
 ```bash
 # Run the schema flattening example
-pnpm --filter @extension/schema-utils example:flatten
+pnpm --filter @agent-guard/schema-utils example:flatten
 
 # Run the schema conversion example
-pnpm --filter @extension/schema-utils example:convert
+pnpm --filter @agent-guard/schema-utils example:convert
 ```

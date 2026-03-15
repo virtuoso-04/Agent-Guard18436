@@ -1,5 +1,5 @@
 {
-  "name": "@extension/shared",
+  "name": "@agent-guard/shared",
   "version": "0.1.13",
   "description": "chrome extension - shared code",
   "private": true,
@@ -21,7 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@extension/storage": "workspace:*",
-    "@extension/tsconfig": "workspace:*"
+    "@agent-guard/storage": "workspace:*",
+    "@agent-guard/tsconfig": "workspace:*"
   }
 }

@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react';
-import { threatLogStore } from '@extension/storage';
-import type { ThreatEvent } from '@extension/storage/lib/security/types';
-import { FiShield, FiAlertTriangle, FiCheckCircle, FiClock, FiSearch, FiRefreshCw, FiFileText } from 'react-icons/fi';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { threatLogStore } from '@agent-guard/storage';
+import type { ThreatEvent } from '@agent-guard/storage/lib/security/types';
+import { FiShield, FiAlertTriangle, FiCheckCircle, FiClock, FiSearch, FiRefreshCw } from 'react-icons/fi';
 
 interface SecurityLogSettingsProps {
   isDarkMode?: boolean;
 }
 
+const PAGE_SIZE = 25;
+const focusRingClasses =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-primary focus-visible:shadow-lg focus-visible:shadow-guard-primary/30';
+
 export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsProps) => {
   const [logs, setLogs] = useState<ThreatEvent[]>([]);
   const [stats, setStats] = useState({ total: 0, lastEventAt: null as number | null });
   const [filter, setFilter] = useState('');
+  const deferredFilter = useDeferredValue(filter);
   const [verificationResult, setVerificationResult] = useState<{
     status: 'idle' | 'checking' | 'verified' | 'failed';
     details?: string;
   }>({ status: 'idle' });
+  const [page, setPage] = useState(0);
 
   const loadLogs = async () => {
     const allLogs = await threatLogStore.getAll();
@@ -58,12 +64,25 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
     }
   };
 
-  const filteredLogs = logs.filter(
-    log =>
-      log.sourceUrl.toLowerCase().includes(filter.toLowerCase()) ||
-      log.threatType.toLowerCase().includes(filter.toLowerCase()) ||
-      log.id.toLowerCase().includes(filter.toLowerCase()),
+  const filteredLogs = useMemo(() => {
+    const query = deferredFilter.trim().toLowerCase();
+    if (!query) return logs;
+    return logs.filter(log => {
+      const haystack = `${log.sourceUrl} ${log.threatType} ${log.id}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [logs, deferredFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const paginatedLogs = useMemo(
+    () => filteredLogs.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE),
+    [filteredLogs, safePage],
   );
+
+  useEffect(() => {
+    setPage(0);
+  }, [deferredFilter, logs.length]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -109,9 +128,11 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
                   verificationResult.status === 'verified'
                     ? 'text-safe-green'
                     : verificationResult.status === 'failed'
-                      ? 'text-apple-dark-red'
+                      ? 'text-critical-red'
                       : ''
-                }`}>
+                }`}
+                role="status"
+                aria-live="polite">
                 {verificationResult.status === 'idle'
                   ? 'Unverified'
                   : verificationResult.status === 'checking'
@@ -151,7 +172,7 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
           onChange={e => setFilter(e.target.value)}
           className={`w-full rounded-2xl border py-4 pl-12 pr-4 glass ${
             isDarkMode ? 'border-apple-dark-border' : 'border-apple-border'
-          } outline-none focus:ring-2 focus:ring-apple-blue transition-all text-sm`}
+          } outline-none focus:ring-2 focus:ring-guard-primary transition-all text-sm`}
         />
       </div>
 
@@ -168,8 +189,8 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
             </tr>
           </thead>
           <tbody className="divide-y divide-apple-border dark:divide-apple-dark-border">
-            {filteredLogs.length > 0 ? (
-              filteredLogs.map(log => (
+            {paginatedLogs.length > 0 ? (
+              paginatedLogs.map(log => (
                 <tr key={log.id} className="group hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
@@ -182,7 +203,7 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-current`}>
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-current ${getSeverityColor(log.severity)}`}>
                       {log.severity}
                     </span>
                   </td>
@@ -194,7 +215,7 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span
-                      className={`text-[10px] font-bold uppercase tracking-widest ${log.wasBlocked ? 'text-safe-green' : 'text-apple-blue'}`}>
+                      className={`text-[10px] font-bold uppercase tracking-widest ${log.wasBlocked ? 'text-safe-green' : 'text-guard-primary'}`}>
                       {log.wasBlocked ? 'Blocked' : 'Sanitized'}
                     </span>
                   </td>
@@ -209,6 +230,34 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <span>
+          Showing {filteredLogs.length === 0 ? 0 : safePage * PAGE_SIZE + 1}–
+          {Math.min(filteredLogs.length, (safePage + 1) * PAGE_SIZE)} of {filteredLogs.length} events
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage(prev => Math.max(prev - 1, 0))}
+            disabled={safePage === 0}
+            className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30 ${focusRingClasses}`}
+            aria-label="Previous page">
+            Prev
+          </button>
+          <span>
+            Page {safePage + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))}
+            disabled={safePage >= totalPages - 1}
+            className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30 ${focusRingClasses}`}
+            aria-label="Next page">
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Footer Info */}

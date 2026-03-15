@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
-import { makeEntryPointPlugin } from '@extension/hmr';
-import { isDev, withPageConfig } from '@extension/vite-config';
+import { makeEntryPointPlugin } from '@agent-guard/hmr';
+import { isDev, withPageConfig } from '@agent-guard/vite-config';
 
 const rootDir = resolve(__dirname);
 const srcDir = resolve(rootDir, 'src');

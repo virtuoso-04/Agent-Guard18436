@@ -1,5 +1,5 @@
 {
-  "name": "@extension/vite-config",
+  "name": "@agent-guard/vite-config",
   "version": "0.1.13",
   "description": "chrome extension - vite base configuration",
   "main": "index.mjs",
@@ -10,9 +10,9 @@
     "clean": "pnpm clean:node_modules"
   },
   "devDependencies": {
-    "@extension/hmr": "workspace:*",
-    "@extension/tsconfig": "workspace:*",
-    "@vitejs/plugin-react-swc": "^3.7.2",
+    "@agent-guard/hmr": "workspace:*",
+    "@agent-guard/tsconfig": "workspace:*",
+    "@vitejs/plugin-react-swc": "^3.11.0",
     "deepmerge": "^4.3.1"
   }
 }

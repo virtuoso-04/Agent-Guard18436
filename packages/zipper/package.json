@@ -1,5 +1,5 @@
 {
-  "name": "@extension/zipper",
+  "name": "@agent-guard/zipper",
   "version": "0.1.13",
   "description": "chrome extension - zipper",
   "private": true,
@@ -23,9 +23,9 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@extension/tsconfig": "workspace:*",
-    "fast-glob": "^3.3.2",
+    "@agent-guard/tsconfig": "workspace:*",
+    "fast-glob": "^3.3.3",
     "fflate": "^0.8.2",
-    "tsx": "^4.19.2"
+    "tsx": "^4.21.0"
   }
 }

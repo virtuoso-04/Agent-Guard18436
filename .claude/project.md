@@ -2,7 +2,7 @@
 
 ## What This Is
 
-**Nanobrowser** — an open-source AI web automation Chrome extension. Users type natural language tasks; a local multi-agent system (Planner + Navigator) uses LLMs to control the browser and complete them. Free alternative to OpenAI Operator.
+**Agent Guard** — an open-source AI web automation Chrome extension. Users type natural language tasks; a local multi-agent system (Planner + Navigator) uses LLMs to control the browser and complete them. Free alternative to OpenAI Operator.
 
 **Current version:** 0.1.13 (from `package.json`)
 **Manifest:** Chrome V3 only (Chrome/Edge). No Firefox.

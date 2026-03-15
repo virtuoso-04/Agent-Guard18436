@@ -1,4 +1,4 @@
-import baseConfig from '@extension/tailwindcss-config';
+import baseConfig from '@agent-guard/tailwindcss-config';
 import type { Config } from 'tailwindcss/types/config';
 
 export default {

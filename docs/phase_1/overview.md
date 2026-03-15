@@ -2,7 +2,7 @@
 
 ## What is Agent-Guard?
 
-Agent-Guard is a security layer built on top of **Nanobrowser** — an open-source AI web automation Chrome extension. Nanobrowser lets users give natural-language instructions to an AI agent (e.g. "book me a flight to Paris"), and the agent browses the web, clicks buttons, fills forms, and returns results — all running locally in your browser.
+Agent-Guard is a security layer built on top of **Agent Guard** — an open-source AI web automation Chrome extension. Agent Guard lets users give natural-language instructions to an AI agent (e.g. "book me a flight to Paris"), and the agent browses the web, clicks buttons, fills forms, and returns results — all running locally in your browser.
 
 Because the agent reads and acts on content from real web pages, it is exposed to a class of attack called **prompt injection**: a malicious website embeds hidden instructions inside its own page content, trying to hijack the agent into doing something the user never asked for.
 

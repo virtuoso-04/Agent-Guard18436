@@ -72,6 +72,12 @@ export default class MessageManager {
     this.stepCounter++;
   }
 
+  /** Get the session key (resolves once generated) */
+  public async getSessionKey(): Promise<CryptoKey> {
+    await this.sessionKeyReady;
+    return this.sessionKey!;
+  }
+
   /**
    * Build a MessageProvenance record and HMAC-sign it.
    * Falls back to an unsigned record if the key isn't ready yet.

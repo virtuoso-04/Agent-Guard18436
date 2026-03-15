@@ -1,4 +1,4 @@
-import { type ProviderConfig, type ModelConfig, ProviderTypeEnum } from '@extension/storage';
+import { type ProviderConfig, type ModelConfig, ProviderTypeEnum } from '@agent-guard/storage';
 import { ChatOpenAI, AzureChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
@@ -21,7 +21,7 @@ class ChatLlama extends ChatOpenAI {
   async completionWithRetry(request: any, options?: any): Promise<any> {
     try {
       // Make the request using the parent's implementation
-      const response = await super.completionWithRetry(request, options);
+      const response = await (ChatOpenAI.prototype as any).completionWithRetry.call(this, request, options);
 
       // Check if this is a Llama API response format
       if (response?.completion_message?.content?.text) {
@@ -351,8 +351,8 @@ export function createChatModel(providerConfig: ProviderConfig, modelConfig: Mod
       console.log('[createChatModel] Calling createOpenAIChatModel for OpenRouter');
       return createOpenAIChatModel(providerConfig, modelConfig, {
         headers: {
-          'HTTP-Referer': 'https://nanobrowser.ai',
-          'X-Title': 'Nanobrowser',
+          'HTTP-Referer': 'https://agent-guard.local',
+          'X-Title': 'Agent Guard',
         },
       });
     }

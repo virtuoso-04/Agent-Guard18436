@@ -3,17 +3,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { PiPlusBold } from 'react-icons/pi';
 import { GrHistory } from 'react-icons/gr';
-import { type Message, Actors, chatHistoryStore, agentModelStore, generalSettingsStore } from '@extension/storage';
-import favoritesStorage, { type FavoritePrompt } from '@extension/storage/lib/prompt/favorites';
-import { t } from '@extension/i18n';
+import { type Message, Actors, chatHistoryStore, agentModelStore, generalSettingsStore } from '@agent-guard/storage';
+import favoritesStorage, { type FavoritePrompt } from '@agent-guard/storage/lib/prompt/favorites';
+import { t } from '@agent-guard/i18n';
 import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
 import SecurityBadge, { SecurityLevel } from './components/SecurityBadge';
 import SecurityEventStream, { type SecurityStreamEntry } from './components/SecurityEventStream';
+import SuggestedPrompts from './components/SuggestedPrompts';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import './SidePanel.css';
+
+const SECURITY_EVENT_STORAGE_KEY = 'agent-guard:security-events';
+const SECURITY_EVENT_DISMISSALS_KEY = 'agent-guard:security-events-dismissed';
+const focusRingClasses =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-primary focus-visible:shadow-lg focus-visible:shadow-guard-primary/30';
 
 // Declare chrome API types
 declare global {
@@ -43,6 +49,7 @@ const SidePanel = () => {
   const [securityLevel, setSecurityLevel] = useState<SecurityLevel>(SecurityLevel.NORMAL);
   const [securityDetectionCount, setSecurityDetectionCount] = useState(0);
   const [securityEvents, setSecurityEvents] = useState<SecurityStreamEntry[]>([]);
+  const [dismissedEventIds, setDismissedEventIds] = useState<Set<string>>(new Set());
   const sessionIdRef = useRef<string | null>(null);
   const isReplayingRef = useRef<boolean>(false);
   const portRef = useRef<chrome.runtime.Port | null>(null);
@@ -52,6 +59,7 @@ const SidePanel = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
+  const dismissedEventIdsRef = useRef<Set<string>>(new Set());
 
   // Check for dark mode preference
   useEffect(() => {
@@ -130,6 +138,86 @@ const SidePanel = () => {
     isReplayingRef.current = isReplaying;
   }, [isReplaying]);
 
+  useEffect(() => {
+    dismissedEventIdsRef.current = dismissedEventIds;
+  }, [dismissedEventIds]);
+
+  useEffect(() => {
+    try {
+      const storedEvents = typeof window !== 'undefined' ? localStorage.getItem(SECURITY_EVENT_STORAGE_KEY) : null;
+      if (storedEvents) {
+        const parsed: SecurityStreamEntry[] = JSON.parse(storedEvents);
+        if (Array.isArray(parsed)) {
+          setSecurityEvents(parsed);
+        }
+      }
+
+      const storedDismissals =
+        typeof window !== 'undefined' ? localStorage.getItem(SECURITY_EVENT_DISMISSALS_KEY) : null;
+      if (storedDismissals) {
+        const parsedDismissals: string[] = JSON.parse(storedDismissals);
+        if (Array.isArray(parsedDismissals)) {
+          setDismissedEventIds(new Set(parsedDismissals));
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to hydrate security event state', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(SECURITY_EVENT_STORAGE_KEY, JSON.stringify(securityEvents));
+      }
+    } catch (error) {
+      console.warn('Failed to persist security events', error);
+    }
+  }, [securityEvents]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(SECURITY_EVENT_DISMISSALS_KEY, JSON.stringify(Array.from(dismissedEventIds)));
+      }
+    } catch (error) {
+      console.warn('Failed to persist dismissed security events', error);
+    }
+  }, [dismissedEventIds]);
+
+  const resetSecurityEvents = useCallback(() => {
+    setSecurityEvents([]);
+  }, []);
+
+  const pushSecurityEvent = useCallback((entry: SecurityStreamEntry) => {
+    setSecurityEvents(prev => {
+      if (dismissedEventIdsRef.current.has(entry.id) || prev.some(evt => evt.id === entry.id)) {
+        return prev;
+      }
+      return [...prev.slice(-19), entry];
+    });
+  }, []);
+
+  const dismissSecurityEvent = useCallback((id?: string) => {
+    let removed: SecurityStreamEntry[] = [];
+    setSecurityEvents(prev => {
+      if (id) {
+        removed = prev.filter(evt => evt.id === id);
+        return prev.filter(evt => evt.id !== id);
+      }
+      removed = prev;
+      return [];
+    });
+
+    if (removed.length > 0) {
+      setDismissedEventIds(prev => {
+        const next = new Set(prev);
+        removed.forEach(evt => next.add(evt.id));
+        return next;
+      });
+    }
+  }, []);
+
   const appendMessage = useCallback((newMessage: Message, sessionId?: string | null) => {
     // Don't save progress messages
     const isProgressMessage = newMessage.content === progressMessage;
@@ -167,7 +255,7 @@ const SidePanel = () => {
               setIsHistoricalSession(false);
               setSecurityLevel(SecurityLevel.NORMAL);
               setSecurityDetectionCount(0);
-              setSecurityEvents([]);
+              resetSecurityEvents();
               break;
             case ExecutionState.TASK_OK:
               setIsFollowUpMode(true);
@@ -203,21 +291,18 @@ const SidePanel = () => {
                 const newLevel = parseInt(parts[0], 10) as SecurityLevel;
                 const newCount = parseInt(parts[1], 10);
                 if (!isNaN(newLevel) && newLevel >= SecurityLevel.NORMAL && newLevel <= SecurityLevel.CRITICAL) {
-                  setSecurityLevel(newLevel);
-
-                  // Add to stream if level increased
-                  if (newLevel > securityLevel) {
-                    setSecurityEvents(prev => [
-                      ...prev.slice(-19),
-                      {
+                  setSecurityLevel(prevLevel => {
+                    if (newLevel > prevLevel) {
+                      pushSecurityEvent({
                         id: `level-${Date.now()}`,
                         timestamp: Date.now(),
                         level: newLevel,
                         message: `Security level escalated to ${SecurityLevel[newLevel]}`,
                         state: ExecutionState.SECURITY_LEVEL_CHANGE,
-                      },
-                    ]);
-                  }
+                      });
+                    }
+                    return newLevel;
+                  });
                 }
                 if (!isNaN(newCount) && newCount >= 0) {
                   setSecurityDetectionCount(newCount);
@@ -227,30 +312,24 @@ const SidePanel = () => {
               break;
             }
             case ExecutionState.PHISHING_DETECTED: {
-              setSecurityEvents(prev => [
-                ...prev.slice(-19),
-                {
-                  id: `phish-${Date.now()}`,
-                  timestamp: Date.now(),
-                  level: SecurityLevel.HIGH,
-                  message: `Phishing Attempt: ${content}`,
-                  state: ExecutionState.PHISHING_DETECTED,
-                },
-              ]);
+              pushSecurityEvent({
+                id: `phish-${Date.now()}`,
+                timestamp: Date.now(),
+                level: SecurityLevel.HIGH,
+                message: `Phishing Attempt: ${content}`,
+                state: ExecutionState.PHISHING_DETECTED,
+              });
               skip = true;
               break;
             }
             case ExecutionState.TRUST_BOUNDARY_CROSSED: {
-              setSecurityEvents(prev => [
-                ...prev.slice(-19),
-                {
-                  id: `boundary-${Date.now()}`,
-                  timestamp: Date.now(),
-                  level: SecurityLevel.ELEVATED,
-                  message: content || 'Trust boundary crossed',
-                  state: ExecutionState.TRUST_BOUNDARY_CROSSED,
-                },
-              ]);
+              pushSecurityEvent({
+                id: `boundary-${Date.now()}`,
+                timestamp: Date.now(),
+                level: SecurityLevel.ELEVATED,
+                message: content || 'Trust boundary crossed',
+                state: ExecutionState.TRUST_BOUNDARY_CROSSED,
+              });
               skip = true;
               break;
             }
@@ -1078,7 +1157,7 @@ const SidePanel = () => {
               <button
                 type="button"
                 onClick={() => handleBackToChat(false)}
-                className="header-icon"
+                className={`header-icon ${focusRingClasses}`}
                 aria-label={t('nav_back_a11y')}>
                 {t('nav_back')}
               </button>
@@ -1097,14 +1176,14 @@ const SidePanel = () => {
                 <button
                   type="button"
                   onClick={handleNewChat}
-                  className="header-icon"
+                  className={`header-icon ${focusRingClasses}`}
                   aria-label={t('nav_newChat_a11y')}>
                   <PiPlusBold size={18} />
                 </button>
                 <button
                   type="button"
                   onClick={handleLoadHistory}
-                  className="header-icon"
+                  className={`header-icon ${focusRingClasses}`}
                   aria-label={t('nav_loadHistory_a11y')}>
                   <GrHistory size={18} />
                 </button>
@@ -1114,18 +1193,13 @@ const SidePanel = () => {
             <button
               type="button"
               onClick={() => chrome.runtime.openOptionsPage()}
-              className="header-icon"
+              className={`header-icon ${focusRingClasses}`}
               aria-label={t('nav_settings_a11y')}>
               <FiSettings size={18} />
             </button>
           </div>
         </header>
-        {!showHistory && (
-          <SecurityEventStream
-            events={securityEvents}
-            onClear={id => (id ? setSecurityEvents(prev => prev.filter(e => e.id !== id)) : setSecurityEvents([]))}
-          />
-        )}
+        {!showHistory && <SecurityEventStream events={securityEvents} onClear={dismissSecurityEvent} />}
         {showHistory ? (
           <div className="flex-1 overflow-hidden">
             <ChatHistoryList
@@ -1154,11 +1228,17 @@ const SidePanel = () => {
             {hasConfiguredModels === false && (
               <div className="flex flex-1 items-center justify-center p-8">
                 <div className="max-w-md text-center">
-                  <h3 className="mb-2 text-2xl font-bold font-['Outfit']">{t('welcome_title')}</h3>
-                  <p className="mb-4 text-gray-500">{t('welcome_instruction')}</p>
+                  <div
+                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow-xl`}>
+                    <img src="/logo.png" className="h-12 w-12" alt="Agent-Guard" />
+                  </div>
+                  <h3 className="mb-2 text-3xl font-bold font-['Outfit'] tracking-tight">{t('welcome_title')}</h3>
+                  <p className={`mb-6 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {t('welcome_instruction')}
+                  </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
-                    className="my-4 rounded-full bg-apple-blue px-8 py-3 font-semibold text-white transition-all hover:scale-105 active:scale-95 shadow-lg">
+                    className="rounded-full bg-guard-primary px-10 py-4 font-bold text-white transition-all hover:scale-105 active:scale-95 shadow-xl hover:shadow-guard-primary/20">
                     {t('welcome_openSettings')}
                   </button>
                 </div>
@@ -1167,30 +1247,24 @@ const SidePanel = () => {
 
             {/* Show normal chat interface when models are configured */}
             {hasConfiguredModels === true && (
-              <>
-                {messages.length === 0 && (
-                  <div className="flex flex-1 flex-col">
-                    <div className="input-container">
-                      <ChatInput
-                        onSendMessage={handleSendMessage}
-                        onStopTask={handleStopTask}
-                        onMicClick={handleMicClick}
-                        isRecording={isRecording}
-                        isProcessingSpeech={isProcessingSpeech}
-                        disabled={!inputEnabled || isHistoricalSession}
-                        showStopButton={showStopButton}
-                        setContent={setter => {
-                          setInputTextRef.current = setter;
-                        }}
-                        isDarkMode={isDarkMode}
-                        historicalSessionId={isHistoricalSession && replayEnabled ? currentSessionId : null}
-                        onReplay={handleReplay}
-                      />
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {messages.length === 0 ? (
+                  <div className="flex flex-1 flex-col overflow-y-auto pt-16">
+                    <div className="mb-8 text-center px-6">
+                      <h1 className="mb-2 text-3xl font-bold font-['Outfit'] tracking-tight">
+                        {t('chat_empty_title')}
+                      </h1>
+                      <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {t('chat_empty_subtitle')}
+                      </p>
                     </div>
-                    <div className="flex-1 overflow-y-auto">
+
+                    <SuggestedPrompts onSelect={p => handleSendMessage(p)} isDarkMode={isDarkMode} />
+
+                    <div className="mt-8 flex-1 px-4 pb-8 text-left">
                       <BookmarkList
                         bookmarks={favoritePrompts}
-                        onBookmarkSelect={handleBookmarkSelect}
+                        onBookmarkSelect={handleSendMessage}
                         onBookmarkUpdateTitle={handleBookmarkUpdateTitle}
                         onBookmarkDelete={handleBookmarkDelete}
                         onBookmarkReorder={handleBookmarkReorder}
@@ -1198,33 +1272,31 @@ const SidePanel = () => {
                       />
                     </div>
                   </div>
-                )}
-                {messages.length > 0 && (
-                  <div className="scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-scroll scroll-smooth p-4">
+                ) : (
+                  <div className="scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-auto scroll-smooth p-4">
                     <MessageList messages={messages} isDarkMode={isDarkMode} />
                     <div ref={messagesEndRef} />
                   </div>
                 )}
-                {messages.length > 0 && (
-                  <div className="input-container">
-                    <ChatInput
-                      onSendMessage={handleSendMessage}
-                      onStopTask={handleStopTask}
-                      onMicClick={handleMicClick}
-                      isRecording={isRecording}
-                      isProcessingSpeech={isProcessingSpeech}
-                      disabled={!inputEnabled || isHistoricalSession}
-                      showStopButton={showStopButton}
-                      setContent={setter => {
-                        setInputTextRef.current = setter;
-                      }}
-                      isDarkMode={isDarkMode}
-                      historicalSessionId={isHistoricalSession && replayEnabled ? currentSessionId : null}
-                      onReplay={handleReplay}
-                    />
-                  </div>
-                )}
-              </>
+
+                <div className="input-container">
+                  <ChatInput
+                    onSendMessage={handleSendMessage}
+                    onStopTask={handleStopTask}
+                    onMicClick={handleMicClick}
+                    isRecording={isRecording}
+                    isProcessingSpeech={isProcessingSpeech}
+                    disabled={!inputEnabled || isHistoricalSession}
+                    showStopButton={showStopButton}
+                    setContent={setter => {
+                      setInputTextRef.current = setter;
+                    }}
+                    isDarkMode={isDarkMode}
+                    historicalSessionId={isHistoricalSession && replayEnabled ? currentSessionId : null}
+                    onReplay={handleReplay}
+                  />
+                </div>
+              </div>
             )}
           </>
         )}

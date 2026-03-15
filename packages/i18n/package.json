@@ -1,5 +1,5 @@
 {
-  "name": "@extension/i18n",
+  "name": "@agent-guard/i18n",
   "version": "0.1.13",
   "description": "chrome extension - internationalization",
   "private": true,
@@ -23,7 +23,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@extension/tsconfig": "workspace:*",
-    "@extension/hmr": "workspace:*"
+    "@agent-guard/tsconfig": "workspace:*",
+    "@agent-guard/hmr": "workspace:*"
   }
 }

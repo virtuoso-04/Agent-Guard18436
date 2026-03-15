@@ -1,5 +1,5 @@
 {
-  "name": "@extension/storage",
+  "name": "@agent-guard/storage",
   "version": "0.1.13",
   "description": "chrome extension - storage",
   "private": true,
@@ -21,6 +21,6 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@extension/tsconfig": "workspace:*"
+    "@agent-guard/tsconfig": "workspace:*"
   }
 }

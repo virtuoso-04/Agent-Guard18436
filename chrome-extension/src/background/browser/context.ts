@@ -394,4 +394,9 @@ export default class BrowserContext {
       await page.removeHighlight();
     }
   }
+
+  public async getURL(): Promise<string | null> {
+    const page = await this.getCurrentPage();
+    return page?.url() || null;
+  }
 }

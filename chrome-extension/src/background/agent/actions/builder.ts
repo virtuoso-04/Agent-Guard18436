@@ -1,5 +1,5 @@
 import { ActionResult, type AgentContext } from '@src/background/agent/types';
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 import {
   clickElementActionSchema,
   doneActionSchema,
@@ -28,7 +28,7 @@ import { createLogger } from '@src/background/log';
 import { ExecutionState, Actors } from '../event/types';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { wrapUntrustedContent } from '../messages/utils';
-import { credentialVerifier } from '../../services/phishing/credentialVerifier';
+import { credentialVerifier } from '../../services/security/network/credentialVerifier';
 
 const logger = createLogger('Action');
 
@@ -291,31 +291,39 @@ export class ActionBuilder {
         }
 
         // ── Credential Protection (Issue 3.4) ──────────────────────────
-        const isPassword = elementNode.attributes?.type === 'password' || (elementNode.tagName === 'input' && elementNode.attributes?.type === 'password');
-        const isMFA = /mfa|otp|code|auth/i.test(elementNode.attributes?.name || '') || /mfa|otp|code|auth/i.test(elementNode.attributes?.id || '');
-        
+        const isPassword =
+          elementNode.attributes?.type === 'password' ||
+          (elementNode.tagName === 'input' && elementNode.attributes?.type === 'password');
+        const isMFA =
+          /mfa|otp|code|auth/i.test(elementNode.attributes?.name || '') ||
+          /mfa|otp|code|auth/i.test(elementNode.attributes?.id || '');
+
         if (isPassword || isMFA) {
-           const verification = credentialVerifier.verifyDomain(
-              state.url,
-              this.context.credentialContext,
-              isPassword ? 'password' : 'token'
-           );
+          const verification = credentialVerifier.verifyDomain(
+            state.url,
+            this.context.credentialContext,
+            isPassword ? 'password' : 'token',
+          );
 
-           if (isMFA) {
-              this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.MFA_INPUT_DETECTED, `MFA input detected on ${new URL(state.url).hostname}`);
-           }
+          if (isMFA) {
+            this.context.emitEvent(
+              Actors.NAVIGATOR,
+              ExecutionState.MFA_INPUT_DETECTED,
+              `MFA input detected on ${new URL(state.url).hostname}`,
+            );
+          }
 
-           if (!verification.allowed) {
-              logger.error('BLOCKING sensitive input:', verification.reason);
-              
-              if (verification.reason.includes('CREDENTIAL_INPUT_ON_HTTP')) {
-                 this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.CREDENTIAL_INPUT_ON_HTTP, verification.reason);
-              } else {
-                 this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.PHISHING_DETECTED, verification.reason);
-              }
+          if (!verification.allowed) {
+            logger.error('BLOCKING sensitive input:', verification.reason);
 
-              return new ActionResult({ error: `SECURITY_BLOCK: ${verification.reason}`, includeInMemory: true });
-           }
+            if (verification.reason.includes('CREDENTIAL_INPUT_ON_HTTP')) {
+              this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.CREDENTIAL_INPUT_ON_HTTP, verification.reason);
+            } else {
+              this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.PHISHING_DETECTED, verification.reason);
+            }
+
+            return new ActionResult({ error: `SECURITY_BLOCK: ${verification.reason}`, includeInMemory: true });
+          }
         }
 
         await page.inputTextElementNode(this.context.options.useVision, elementNode, input.text);

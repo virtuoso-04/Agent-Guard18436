@@ -1,4 +1,4 @@
-import { domainScorer, type DomainTrustScore } from '../services/phishing/domainScorer';
+import { domainScorer, type DomainTrustScore } from '../services/security/network/domainScorer';
 
 /**
  * Checks if a URL is allowed based on firewall configuration
@@ -9,7 +9,13 @@ import { domainScorer, type DomainTrustScore } from '../services/phishing/domain
  */
 export interface FirewallDecision {
   allowed: boolean;
-  reason: 'explicit_allow' | 'explicit_deny' | 'reputation_block' | 'default_allow' | 'default_deny' | 'dangerous_prefix';
+  reason:
+    | 'explicit_allow'
+    | 'explicit_deny'
+    | 'reputation_block'
+    | 'default_allow'
+    | 'default_deny'
+    | 'dangerous_prefix';
   reputationScore?: DomainTrustScore;
 }
 
@@ -45,7 +51,11 @@ function evaluateUrlSync(url: string, allowList: string[], denyList: string[]): 
   }
 
   // Special case: Allow 'about:blank' explicitly
-  if (trimmedUrl === 'about:blank' || trimmedUrl === 'chrome://new-tab-page/' || trimmedUrl === 'chrome://new-tab-page') {
+  if (
+    trimmedUrl === 'about:blank' ||
+    trimmedUrl === 'chrome://new-tab-page/' ||
+    trimmedUrl === 'chrome://new-tab-page'
+  ) {
     return { allowed: true, reason: 'default_allow' };
   }
 
@@ -64,7 +74,11 @@ function evaluateUrlSync(url: string, allowList: string[], denyList: string[]): 
     // 1. Check against deny list (exact domain or subdomain)
     for (const deniedEntry of denyList) {
       const normalizedRule = deniedEntry.toLowerCase();
-      if (hostname === normalizedRule || hostname.endsWith('.' + normalizedRule) || fullUrlPath.startsWith(normalizedRule)) {
+      if (
+        hostname === normalizedRule ||
+        hostname.endsWith('.' + normalizedRule) ||
+        fullUrlPath.startsWith(normalizedRule)
+      ) {
         return { allowed: false, reason: 'explicit_deny' };
       }
     }
@@ -72,7 +86,11 @@ function evaluateUrlSync(url: string, allowList: string[], denyList: string[]): 
     // 2. Check against allow list
     for (const allowedEntry of allowList) {
       const normalizedRule = allowedEntry.toLowerCase();
-      if (hostname === normalizedRule || hostname.endsWith('.' + normalizedRule) || fullUrlPath.startsWith(normalizedRule)) {
+      if (
+        hostname === normalizedRule ||
+        hostname.endsWith('.' + normalizedRule) ||
+        fullUrlPath.startsWith(normalizedRule)
+      ) {
         return { allowed: true, reason: 'explicit_allow' };
       }
     }

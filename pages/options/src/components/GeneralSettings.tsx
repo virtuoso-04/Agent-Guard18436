@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { type GeneralSettingsConfig, generalSettingsStore, DEFAULT_GENERAL_SETTINGS } from '@extension/storage';
-import { t } from '@extension/i18n';
+import { type GeneralSettingsConfig, generalSettingsStore, DEFAULT_GENERAL_SETTINGS } from '@agent-guard/storage';
+import { t } from '@agent-guard/i18n';
 
 interface GeneralSettingsProps {
   isDarkMode?: boolean;
@@ -28,26 +28,18 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
   };
 
   return (
-    <section className="space-y-6">
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-white'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-left text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+    <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="settings-card">
+        <h3 className="text-sm font-bold uppercase tracking-widest opacity-40 mb-6 border-b pb-2">
           {t('options_general_header')}
-        </h2>
+        </h3>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_maxSteps')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_maxSteps_desc')}
-              </p>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between group">
+            <div className="max-w-[70%]">
+              <h4 className="text-base font-semibold mb-1">{t('options_general_maxSteps')}</h4>
+              <p className="text-sm opacity-60">{t('options_general_maxSteps_desc')}</p>
             </div>
-            <label htmlFor="maxSteps" className="sr-only">
-              {t('options_general_maxSteps')}
-            </label>
             <input
               id="maxSteps"
               type="number"
@@ -55,22 +47,15 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
               max={50}
               value={settings.maxSteps}
               onChange={e => updateSetting('maxSteps', Number.parseInt(e.target.value, 10))}
-              className={`w-20 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2`}
+              className={`w-24 rounded-xl border p-3 text-center font-bold glass ${isDarkMode ? 'border-apple-dark-border' : 'border-apple-border'} outline-none focus:ring-2 focus:ring-guard-primary transition-all`}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_maxActions')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_maxActions_desc')}
-              </p>
+          <div className="flex items-center justify-between group">
+            <div className="max-w-[70%]">
+              <h4 className="text-base font-semibold mb-1">{t('options_general_maxActions')}</h4>
+              <p className="text-sm opacity-60">{t('options_general_maxActions_desc')}</p>
             </div>
-            <label htmlFor="maxActionsPerStep" className="sr-only">
-              {t('options_general_maxActions')}
-            </label>
             <input
               id="maxActionsPerStep"
               type="number"
@@ -78,41 +63,14 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
               max={50}
               value={settings.maxActionsPerStep}
               onChange={e => updateSetting('maxActionsPerStep', Number.parseInt(e.target.value, 10))}
-              className={`w-20 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2`}
+              className={`w-24 rounded-xl border p-3 text-center font-bold glass outline-none focus:ring-2 focus:ring-guard-primary transition-all`}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_maxFailures')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_maxFailures_desc')}
-              </p>
-            </div>
-            <label htmlFor="maxFailures" className="sr-only">
-              {t('options_general_maxFailures')}
-            </label>
-            <input
-              id="maxFailures"
-              type="number"
-              min={1}
-              max={10}
-              value={settings.maxFailures}
-              onChange={e => updateSetting('maxFailures', Number.parseInt(e.target.value, 10))}
-              className={`w-20 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2`}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_enableVision')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_enableVision_desc')}
-              </p>
+          <div className="flex items-center justify-between group">
+            <div className="max-w-[70%]">
+              <h4 className="text-base font-semibold mb-1">{t('options_general_enableVision')}</h4>
+              <p className="text-sm opacity-60">{t('options_general_enableVision_desc')}</p>
             </div>
             <div className="relative inline-flex cursor-pointer items-center">
               <input
@@ -122,96 +80,14 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
                 onChange={e => updateSetting('useVision', e.target.checked)}
                 className="peer sr-only"
               />
-              <label
-                htmlFor="useVision"
-                className={`peer h-6 w-11 rounded-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-200'} after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
-                <span className="sr-only">{t('options_general_enableVision')}</span>
-              </label>
+              <div className="peer h-7 w-12 rounded-full bg-gray-200 dark:bg-gray-700 after:absolute after:left-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:bg-guard-primary peer-checked:after:translate-x-full" />
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_displayHighlights')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_displayHighlights_desc')}
-              </p>
-            </div>
-            <div className="relative inline-flex cursor-pointer items-center">
-              <input
-                id="displayHighlights"
-                type="checkbox"
-                checked={settings.displayHighlights}
-                onChange={e => updateSetting('displayHighlights', e.target.checked)}
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="displayHighlights"
-                className={`peer h-6 w-11 rounded-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-200'} after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
-                <span className="sr-only">{t('options_general_displayHighlights')}</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_planningInterval')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_planningInterval_desc')}
-              </p>
-            </div>
-            <label htmlFor="planningInterval" className="sr-only">
-              {t('options_general_planningInterval')}
-            </label>
-            <input
-              id="planningInterval"
-              type="number"
-              min={1}
-              max={20}
-              value={settings.planningInterval}
-              onChange={e => updateSetting('planningInterval', Number.parseInt(e.target.value, 10))}
-              className={`w-20 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2`}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_minWaitPageLoad')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_minWaitPageLoad_desc')}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <label htmlFor="minWaitPageLoad" className="sr-only">
-                {t('options_general_minWaitPageLoad')}
-              </label>
-              <input
-                id="minWaitPageLoad"
-                type="number"
-                min={250}
-                max={5000}
-                step={50}
-                value={settings.minWaitPageLoad}
-                onChange={e => updateSetting('minWaitPageLoad', Number.parseInt(e.target.value, 10))}
-                className={`w-20 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2`}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                {t('options_general_replayHistoricalTasks')}
-              </h3>
-              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_general_replayHistoricalTasks_desc')}
-              </p>
+          <div className="flex items-center justify-between group">
+            <div className="max-w-[70%]">
+              <h4 className="text-base font-semibold mb-1">{t('options_general_replayHistoricalTasks')}</h4>
+              <p className="text-sm opacity-60">{t('options_general_replayHistoricalTasks_desc')}</p>
             </div>
             <div className="relative inline-flex cursor-pointer items-center">
               <input
@@ -221,11 +97,7 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
                 onChange={e => updateSetting('replayHistoricalTasks', e.target.checked)}
                 className="peer sr-only"
               />
-              <label
-                htmlFor="replayHistoricalTasks"
-                className={`peer h-6 w-11 rounded-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-200'} after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
-                <span className="sr-only">{t('options_general_replayHistoricalTasks')}</span>
-              </label>
+              <div className="peer h-7 w-12 rounded-full bg-gray-200 dark:bg-gray-700 after:absolute after:left-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:bg-guard-primary peer-checked:after:translate-x-full" />
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import type { ValueOf } from '@extension/shared';
+import type { ValueOf } from '@agent-guard/shared';
 
 type ColorType = 'success' | 'info' | 'error' | 'warning' | keyof typeof COLORS;
 

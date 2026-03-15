@@ -7,8 +7,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { threatLogStore } from '@extension/storage';
-import type { ThreatEvent } from '@extension/storage/lib/security/types';
+import { threatLogStore } from '@agent-guard/storage';
+import type { ThreatEvent } from '@agent-guard/storage/lib/security/types';
 import { FiShield, FiAlertCircle, FiAlertTriangle, FiInfo, FiRefreshCw, FiClock } from 'react-icons/fi';
 
 interface PoisoningTimelineProps {

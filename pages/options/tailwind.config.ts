@@ -1,5 +1,5 @@
-import baseConfig from '@extension/tailwindcss-config';
-import { withUI } from '@extension/ui';
+import baseConfig from '@agent-guard/tailwindcss-config';
+import { withUI } from '@agent-guard/ui';
 
 export default withUI({
   ...baseConfig,

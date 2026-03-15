@@ -2,32 +2,35 @@
     <img src="https://github.com/user-attachments/assets/ec60b0c4-87ba-48f4-981a-c55ed0e8497b" height="100" width="375" alt="banner" /><br>
 </h1>
 
-
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nanobrowser)
-[![Twitter](https://img.shields.io/badge/Twitter-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/nanobrowser_ai)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/NN3ABHggMK)
-[<img src="https://deepwiki.com/badge.svg" height="28" alt="Ask DeepWiki">](https://deepwiki.com/nanobrowser/nanobrowser)
-[![Sponsor](https://img.shields.io/badge/Sponsor-ff69b4?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/alexchenzl)
+[![GitHub](#)](#)
+[![Twitter](#)](#)
+[![Discord](#)](#)
 
 </div>
 
+---
+
+### 🏛️ Foundation
+**Agent-Guard** is a security-first AI web automation engine. Built upon the proven multi-agent orchestration of [Nanobrowser](https://github.com/nanobrowser), Agent-Guard introduces a state-of-the-art **Security Abstraction Layer** (SAL) designed to protect users and agents from prompt injection, phishing, and model poisoning.
+
+---
+
 ## 🌐 Agent-Guard
 
-Agent-Guard is an open-source, security-hardened AI web automation Chrome extension with a built-in multi-agent system. It's a free alternative to OpenAI Operator — with enterprise-grade defenses against prompt injection, zero-click attacks, phishing, and model poisoning built directly into the agent runtime.
+Agent-Guard is an open-source, security-hardened AI web automation extension. It provides a robust defense layer directly in the agent runtime, ensuring that your AI agents operate within a verified, tamper-evident environment.
 
-⬇️ Get [Nanobrowser from Chrome Web Store](https://chromewebstore.google.com/detail/nanobrowser/imbddededgmcgfhfpcjmijokokekbkal) for free
+⬇️ [Download Latest Release](https://github.com/TShreek/Agent-Guard18436/releases)
 
-👏 Join the community in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/nanobrowser_ai)
+👏 Join the community in [GitHub](https://github.com/TShreek/Agent-Guard18436/discussions)
 
 🌟 Loving Agent-Guard? Give us a star and help spread the word!
 
-❤️ Support the project by [sponsoring us](https://github.com/sponsors/alexchenzl) - every contribution helps keep Agent-Guard free and open source!
 
 <div align="center">
-<img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="Nanobrowser Demo GIF" />
-<p><em>Nanobrowser's multi-agent system analyzing HuggingFace in real-time, with the Planner intelligently self-correcting when encountering obstacles and dynamically instructing the Navigator to adjust its approach—all running locally in your browser.</em></p>
+<img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="Agent-Guard Demo" />
+<p><em>Agent-Guard's multi-agent system intelligently navigating complex web workflows while maintaining a real-time security perimeter.</em></p>
 </div>
 
 ## 🔥 Why Agent-Guard?
@@ -48,10 +51,10 @@ Agent-Guard is building industry-grade security into every layer of the AI agent
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| **Phase 1** | Prompt Injection Defense & Content Integrity — multi-pass sanitization, TOON format, cryptographic message provenance, threat audit log | 🚧 In Progress |
-| **Phase 2** | Zero-Click Attack Prevention & DOM Integrity — element fingerprinting, action confirmation gate, DOM taint analysis, atomic state locking | 📋 Planned |
-| **Phase 3** | Phishing Detection & Navigation Trust — domain lookalike scoring, page heuristics, redirect chain auditing, smart firewall | 📋 Planned |
-| **Phase 4** | Model Poisoning Resistance — intent anchoring, behavioral anomaly detection, tamper-evident reasoning traces, operator dashboard | 📋 Planned |
+| **Phase 1** | Prompt Injection Defense & Content Integrity — multi-pass sanitization, TOON format, cryptographic message provenance, threat audit log | ✅ Completed |
+| **Phase 2** | Zero-Click Attack Prevention & DOM Integrity — element fingerprinting, action confirmation gate, DOM taint analysis, atomic state locking | ✅ Completed |
+| **Phase 3** | Phishing Detection & Navigation Trust — domain lookalike scoring, page heuristics, redirect chain auditing, smart firewall | ✅ Completed |
+| **Phase 4** | Model Poisoning Resistance — intent anchoring, behavioral anomaly detection, tamper-evident reasoning traces, operator dashboard | ✅ Completed |
 
 See the full roadmap and open issues: [Security Issues →](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity)
 
@@ -76,52 +79,42 @@ See the full roadmap and open issues: [Security Issues →](https://github.com/T
 **Not Supported:**
 - Firefox, Safari, and other Chromium variants (Opera, Arc, etc.)
 
-> **Note**: While Nanobrowser may function on other Chromium-based browsers, we recommend using Chrome or Edge for the best experience and guaranteed compatibility.
+> **Note**: While Agent Guard may function on other Chromium-based browsers, we recommend using Chrome or Edge for the best experience and guaranteed compatibility.
 
 
 ## 🚀 Quick Start
 
-1. **Install from Chrome Web Store** (Stable Version):
-   * Visit the [Nanobrowser Chrome Web Store page](https://chromewebstore.google.com/detail/nanobrowser/imbddededgmcgfhfpcjmijokokekbkal)
-   * Click "Add to Chrome" button
-   * Confirm the installation when prompted
-
-> **Important Note**: For latest features, install from ["Manually Install Latest Version"](#-manually-install-latest-version) below, as Chrome Web Store version may be delayed due to review process.
-
-2. **Configure Agent Models**:
-   * Click the Nanobrowser icon in your toolbar to open the sidebar
-   * Click the `Settings` icon (top right)
+1. **Configure Agent Models**:
+   * Click the Agent Guard icon in your toolbar to open the sidebar
+   * Click the **Settings** icon (top right)
    * Add your LLM API keys
    * Choose which model to use for different agents (Navigator, Planner)
 
+> **Tip**: For the latest security patches, ensure you are running the latest version from our [GitHub Releases](https://github.com/TShreek/Agent-Guard18436/releases).
+
 ## 🔧 Manually Install Latest Version
 
-To get the most recent version with all the latest features:
+To get the most recent security features:
 
-1. **Download**
-    * Download the latest `nanobrowser.zip` file from the official Github [release page](https://github.com/nanobrowser/nanobrowser/releases).
+1. **Download**:
+    * Download `Agent-Guard.zip` from our [Release Page](https://github.com/TShreek/Agent-Guard18436/releases).
 
 2. **Install**:
-    * Unzip `nanobrowser.zip`.
-    * Open `chrome://extensions/` in Chrome
-    * Enable `Developer mode` (top right)
-    * Click `Load unpacked` (top left)
-    * Select the unzipped `nanobrowser` folder.
+    * Unzip the archive.
+    * Open `chrome://extensions/` in Chrome.
+    * Enable **Developer mode** (top right).
+    * Click **Load unpacked** and select the unzipped release folder.
 
-3. **Configure Agent Models**
-    * Click the Nanobrowser icon in your toolbar to open the sidebar
-    * Click the `Settings` icon (top right).
-    * Add your LLM API keys.
-    * Choose which model to use for different agents (Navigator, Planner)
+> **Note**: Once installed, click the Agent Guard icon in your toolbar, go to **Settings**, and add your LLM API keys to begin.
 
 4. **Upgrading**:
-    * Download the latest `nanobrowser.zip` file from the release page.
-    * Unzip and replace your existing Nanobrowser files with the new ones.
-    * Go to `chrome://extensions/` in Chrome and click the refresh icon on the Nanobrowser card.
+    * Download the latest `Agent Guard.zip` file from the release page.
+    * Unzip and replace your existing Agent Guard files with the new ones.
+    * Go to `chrome://extensions/` in Chrome and click the refresh icon on the Agent Guard card.
 
 ## 🛠️ Build from Source
 
-If you prefer to build Nanobrowser yourself, follow these steps:
+If you prefer to build Agent Guard yourself, follow these steps:
 
 1. **Prerequisites**:
    * [Node.js](https://nodejs.org/) (v22.12.0 or higher)
@@ -129,8 +122,8 @@ If you prefer to build Nanobrowser yourself, follow these steps:
 
 2. **Clone the Repository**:
    ```bash
-   git clone https://github.com/nanobrowser/nanobrowser.git
-   cd nanobrowser
+   git clone https://github.com/TShreek/Agent-Guard18436.git
+   cd Agent-Guard18436
    ```
 
 3. **Install Dependencies**:
@@ -154,7 +147,7 @@ If you prefer to build Nanobrowser yourself, follow these steps:
 
 ## 🤖 Choosing Your Models
 
-Nanobrowser allows you to configure different LLM models for each agent to balance performance and cost. Here are recommended configurations:
+Agent Guard allows you to configure different LLM models for each agent to balance performance and cost. Here are recommended configurations:
 
 ### Better Performance
 - **Planner**: Claude Sonnet 4
@@ -213,17 +206,15 @@ We're actively developing Agent-Guard with exciting features on the horizon — 
 
 **Security hardening** is our current primary focus. Each security phase ships as a standalone, production-ready milestone with its own unit and integration test suite. Track progress in our [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity).
 
-For the full feature roadmap and broader discussions, visit our [GitHub Discussions](https://github.com/nanobrowser/nanobrowser/discussions/85).
+For the full feature roadmap and broader discussions, visit our [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions).
 
 ## 🤝 Contributing
 
 **We need your help to make Agent-Guard even better!** Contributions of all kinds are welcome:
 
 *  **Share Prompts & Use Cases** 
-   * Join our [Discord server](https://discord.gg/NN3ABHggMK).
-   * share how you're using Nanobrowser.  Help us build a library of useful prompts and real-world use cases.
-*  **Provide Feedback** 
-   * Try Nanobrowser and give us feedback on its performance or suggest improvements in our [Discord server](https://discord.gg/NN3ABHggMK).
+   * share how you're using Agent Guard. Help us build a library of useful prompts and real-world use cases.
+   * Try Agent Guard and give us feedback on its performance or suggest improvements in our [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions).
 * **Contribute Code**
    * Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute code to the project.
    * Submit pull requests for bug fixes, features, or documentation improvements.
@@ -246,14 +237,12 @@ We appreciate your help in keeping Agent-Guard and its users safe!
 
 Join our growing community of developers and users:
 
-- [Discord](https://discord.gg/NN3ABHggMK) - Chat with the team and community
-- [Twitter](https://x.com/nanobrowser_ai) - Follow for updates and announcements
-- [GitHub Discussions](https://github.com/nanobrowser/nanobrowser/discussions) - Share ideas and ask questions
+- [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions) - Share ideas and ask questions
 - [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity) - Track the security hardening roadmap
 
 ## 👏 Acknowledgments
 
-Nanobrowser builds on top of other awesome open-source projects:
+Agent Guard builds on top of other awesome open-source projects:
 
 - [Browser Use](https://github.com/browser-use/browser-use)
 - [Puppeteer](https://github.com/EmergenceAI/Agent-E)
@@ -268,13 +257,13 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 Made with ❤️ by the Agent-Guard Team.
 
-Like Agent-Guard? Give us a star 🌟 and join us in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/nanobrowser_ai)
+Like Agent-Guard? Give us a star 🌟 on [GitHub](https://github.com/TShreek/Agent-Guard18436)!
 
 ## ⚠️ DISCLAIMER ON DERIVATIVE PROJECTS
 
 **We explicitly *DO NOT* endorse, support, or participate in any** projects involving cryptocurrencies, tokens, NFTs, or other blockchain-related applications **based on this codebase.**
 
-**Any such derivative projects are NOT Affiliated with, or maintained by, or in any way connected to the official Nanobrowser project or its core team.**
+**Any such derivative projects are NOT Affiliated with, or maintained by, or in any way connected to the official Agent Guard project or its core team.**
 
 **We assume NO LIABILITY for any losses, damages, or issues arising from the use of third-party derivative projects. Users interact with these projects at their own risk.**
 

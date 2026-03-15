@@ -104,7 +104,7 @@ Never commit secrets or API keys.
 Task order:
 1. `ready` — package preparation (i18n generation, etc.) — must complete first
 2. `build` — Vite bundles each workspace independently
-3. `zip` — packages `dist/` into `dist-zip/nanobrowser.zip`
+3. `zip` — packages `dist/` into `dist-zip/Agent Guard.zip`
 
 Dev mode sets `__DEV__=true`. Use `import.meta.env.DEV` to gate debug code:
 ```typescript
@@ -162,7 +162,7 @@ import { AgentOptions } from './types';  // type-only import not declared as typ
 3. **New UI component**: Check `packages/ui/lib/` first; if reusable put it there, else put in the page's `src/components/`
 4. **New LLM provider**: Add to `ProviderTypeEnum` in `packages/storage/lib/settings/types.ts` → add factory case in `chrome-extension/src/background/agent/helper.ts` → add UI in `pages/options/src/components/ModelSettings.tsx`
 5. **New port message type**: Handle in `background/index.ts` switch → add handler + i18n keys → update this doc
-6. **New i18n key**: Edit `packages/i18n/locales/en/messages.json` (and other locales) → rebuild (`pnpm -F @extension/i18n build`) → generated types update automatically
+6. **New i18n key**: Edit `packages/i18n/locales/en/messages.json` (and other locales) → rebuild (`pnpm -F @agent-guard/i18n build`) → generated types update automatically
 
 ---
 

@@ -1,7 +1,7 @@
 // Import Manifest V3 compatible PostHog - no-external bundle to avoid CSP issues
 import * as PostHog from 'posthog-js/dist/module.no-external';
 const posthog = PostHog.default || PostHog;
-import { analyticsSettingsStore } from '@extension/storage';
+import { analyticsSettingsStore } from '@agent-guard/storage';
 import { createLogger } from '../log';
 
 const logger = createLogger('Analytics');

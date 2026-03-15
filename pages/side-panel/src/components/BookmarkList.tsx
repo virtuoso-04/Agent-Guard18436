@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from 'react';
 import { FaTrash, FaPen, FaCheck, FaTimes } from 'react-icons/fa';
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 
 interface Bookmark {
   id: number;
@@ -85,7 +85,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
       <h3 className={`mb-3 text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
         {t('chat_bookmarks_header')}
       </h3>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {bookmarks.map(bookmark => (
           <div
             key={bookmark.id}
@@ -94,9 +94,9 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
             onDragEnd={handleDragEnd}
             onDragOver={handleDragOver}
             onDrop={e => handleDrop(e, bookmark.id)}
-            className={`group relative rounded-lg p-3 ${
-              isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:bg-sky-50'
-            } border ${isDarkMode ? 'border-slate-700' : 'border-sky-100'}`}>
+            className={`group relative rounded-2xl p-4 transition-all hover:scale-[1.01] ${
+              isDarkMode ? 'bg-slate-800/60 hover:bg-slate-700/80' : 'bg-white hover:bg-slate-50'
+            } border ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200/60'} shadow-sm`}>
             {editingId === bookmark.id ? (
               <div className="flex items-center">
                 <input

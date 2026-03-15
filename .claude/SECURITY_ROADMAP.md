@@ -1,10 +1,10 @@
-# Nanobrowser Security Hardening Roadmap
+# Agent Guard Security Hardening Roadmap
 
 ## Overview
 
-This document defines the four-phase security hardening program for Nanobrowser. Each phase is a **production-ready, self-contained milestone** with its own unit and integration tests, shipped incrementally so the extension remains stable and deployable throughout.
+This document defines the four-phase security hardening program for Agent Guard. Each phase is a **production-ready, self-contained milestone** with its own unit and integration tests, shipped incrementally so the extension remains stable and deployable throughout.
 
-The threat model is grounded in a real security audit of the existing codebase. Nanobrowser is uniquely exposed: it runs LLMs over live web content, executes real browser actions, handles sensitive credentials, and is exposed to adversarial page content on every task. Standard web security is insufficient — the attack surface includes the LLM reasoning layer itself.
+The threat model is grounded in a real security audit of the existing codebase. Agent Guard is uniquely exposed: it runs LLMs over live web content, executes real browser actions, handles sensitive credentials, and is exposed to adversarial page content on every task. Standard web security is insufficient — the attack surface includes the LLM reasoning layer itself.
 
 ---
 
@@ -61,7 +61,7 @@ The firewall is user-configured URL allow/deny lists with no intelligence. It do
 - Certificate and protocol enforcement: HTTPS required for any action that involves form submission or credential input; HTTP-only pages are flagged
 - Integration tests using a local mock server with known phishing page patterns; unit tests for all scoring heuristics
 
-**Why It Matters:** As Nanobrowser is used for more sensitive tasks (logging into accounts, filling forms, making purchases), phishing is the highest-likelihood real-world attack.
+**Why It Matters:** As Agent Guard is used for more sensitive tasks (logging into accounts, filling forms, making purchases), phishing is the highest-likelihood real-world attack.
 
 ---
 
@@ -80,7 +80,7 @@ There is no concept of task-level behavioral integrity. Once content enters the 
 - Replay integrity verification: when replaying a saved history, each step is re-verified against its original element hash and action schema before execution — tampered histories fail with a `ReplayIntegrityError`
 - Operator dashboard in the options page: aggregate view of security events across sessions, threat frequency by type, most-targeted domains, blocked action counts
 
-**Why It Matters:** This is the layer that turns security from reactive (block known bad) to proactive (detect novel attacks, give operators visibility). It's also what makes Nanobrowser enterprise-deployable.
+**Why It Matters:** This is the layer that turns security from reactive (block known bad) to proactive (detect novel attacks, give operators visibility). It's also what makes Agent Guard enterprise-deployable.
 
 ---
 

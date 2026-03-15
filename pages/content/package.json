@@ -1,5 +1,5 @@
 {
-  "name": "@extension/content-script",
+  "name": "@agent-guard/content-script",
   "version": "0.1.13",
   "description": "chrome extension - content script",
   "private": true,
@@ -19,13 +19,13 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@extension/shared": "workspace:*",
-    "@extension/storage": "workspace:*"
+    "@agent-guard/shared": "workspace:*",
+    "@agent-guard/storage": "workspace:*"
   },
   "devDependencies": {
-    "@extension/hmr": "workspace:*",
-    "@extension/tsconfig": "workspace:*",
-    "@extension/vite-config": "workspace:*",
+    "@agent-guard/hmr": "workspace:*",
+    "@agent-guard/tsconfig": "workspace:*",
+    "@agent-guard/vite-config": "workspace:*",
     "cross-env": "^7.0.3"
   }
 }

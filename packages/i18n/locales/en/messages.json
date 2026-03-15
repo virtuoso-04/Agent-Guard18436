@@ -1,11 +1,11 @@
 {
   "app_metadata_description": {
     "description": "Extension description",
-    "message": "Automate web tasks with AI! NanoBrowser is an open-source browser extension that lets you extract data, fill forms, and more."
+    "message": "Secure AI web automation! Agent Guard provides real-time risk assessment, robust guardrails, and tamper-evident auditing for your AI agents."
   },
   "app_metadata_name": {
     "description": "Extension name",
-    "message": "Nanobrowser: AI Web Agent & Automation"
+    "message": "Agent Guard"
   },
   "errors_unknown": {
     "message": "Unknown error occurred"
@@ -38,10 +38,10 @@
     "message": "Back to chat"
   },
   "welcome_title": {
-    "message": "Welcome to Nanobrowser!"
+    "message": "Secure AI Automation"
   },
   "welcome_instruction": {
-    "message": "To get started, please configure your API keys in the settings page."
+    "message": "Configure your LLM providers to enable the security abstraction layer and start automating safely."
   },
   "welcome_openSettings": {
     "message": "Open Settings"
@@ -66,6 +66,12 @@
   },
   "chat_input_placeholder": {
     "message": "What can I help you with?"
+  },
+  "chat_empty_title": {
+    "message": "How can I help you?"
+  },
+  "chat_empty_subtitle": {
+    "message": "Agent-Guard is ready to automate your browser safely."
   },
   "chat_input_form": {
     "message": "Chat input form"
@@ -167,7 +173,7 @@
     "message": "Enable Voice Input"
   },
   "permissions_microphone_description": {
-    "message": "Nanobrowser needs microphone access to convert your speech to text."
+    "message": "Agent Guard needs microphone access to convert your speech to text."
   },
   "permissions_microphone_grantButton": {
     "message": "Grant Microphone Permission"

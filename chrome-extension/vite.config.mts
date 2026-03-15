@@ -2,8 +2,8 @@ import { resolve } from 'node:path';
 import { defineConfig, type PluginOption, loadEnv } from "vite";
 import libAssetsPlugin from '@laynezh/vite-plugin-lib-assets';
 import makeManifestPlugin from './utils/plugins/make-manifest-plugin';
-import { watchPublicPlugin, watchRebuildPlugin } from '@extension/hmr';
-import { isDev, isProduction, watchOption } from '@extension/vite-config';
+import { watchPublicPlugin, watchRebuildPlugin } from '@agent-guard/hmr';
+import { isDev, isProduction, watchOption } from '@agent-guard/vite-config';
 
 const rootDir = resolve(__dirname);
 const srcDir = resolve(rootDir, 'src');

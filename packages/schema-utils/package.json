@@ -1,5 +1,5 @@
 {
-  "name": "@extension/schema-utils",
+  "name": "@agent-guard/schema-utils",
   "version": "0.1.13",
   "description": "JSON schema and related helpers for tools",
   "private": true,
@@ -24,6 +24,6 @@
     "example:flatten": "pnpm run ready && node dist/examples/flatten.js"
   },
   "devDependencies": {
-    "@extension/tsconfig": "workspace:*"
+    "@agent-guard/tsconfig": "workspace:*"
   }
 }

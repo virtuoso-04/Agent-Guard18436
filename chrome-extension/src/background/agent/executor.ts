@@ -1,6 +1,6 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { type ActionResult, AgentContext, type AgentOptions, type AgentOutput } from './types';
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 import { NavigatorAgent, NavigatorActionRegistry } from './agents/navigator';
 import { PlannerAgent, type PlannerOutput } from './agents/planner';
 import { NavigatorPrompt } from './prompts/navigator';
@@ -21,11 +21,15 @@ import {
   MaxFailuresReachedError,
 } from './agents/errors';
 import { URLNotAllowedError } from '../browser/views';
-import { chatHistoryStore } from '@extension/storage/lib/chat';
+import { chatHistoryStore } from '@agent-guard/storage/lib/chat';
 import type { AgentStepHistory } from './history';
-import type { GeneralSettingsConfig } from '@extension/storage';
+import type { GeneralSettingsConfig } from '@agent-guard/storage';
 import { analytics } from '../services/analytics';
-import { extractServiceFromTask, getExpectedDomainsForService } from '../services/phishing/credentialDomains';
+import { extractServiceFromTask, getExpectedDomainsForService } from '../services/security/network/credentialDomains';
+import { AuditLogger } from '../services/security/content/auditLogger';
+import { IntentAnchoring } from '../services/security/behavior/intentAnchoring';
+import { BehaviorAnalyzer, createBehaviorAnalyzer } from '../services/security/behavior/behaviorAnalyzer';
+import { SecurityTracer } from '../services/security/behavior/securityTracer';
 
 const logger = createLogger('Executor');
 
@@ -43,6 +47,9 @@ export class Executor {
   private readonly plannerPrompt: PlannerPrompt;
   private readonly navigatorPrompt: NavigatorPrompt;
   private readonly generalSettings: GeneralSettingsConfig | undefined;
+  private readonly intentAnchoring: IntentAnchoring;
+  private readonly securityTracer: SecurityTracer;
+  private readonly behaviorAnalyzer: BehaviorAnalyzer;
   private tasks: string[] = [];
   constructor(
     task: string,
@@ -63,6 +70,18 @@ export class Executor {
       eventManager,
       extraArgs?.agentOptions ?? {},
     );
+
+    // ── Cryptographic Identity & Audit Logging (Issue 1.3 & 1.4) ──
+    this.intentAnchoring = new IntentAnchoring(plannerLLM);
+    this.securityTracer = new SecurityTracer();
+    messageManager.getSessionKey().then((key: CryptoKey) => {
+      context.sessionKey = key;
+      context.auditLogger = new AuditLogger(key);
+      this.securityTracer.setSessionKey(key);
+      void this.intentAnchoring.anchorTask(task, key);
+    });
+
+    this.behaviorAnalyzer = createBehaviorAnalyzer(taskId);
 
     this.generalSettings = extraArgs?.generalSettings;
     this.tasks.push(task);
@@ -178,6 +197,29 @@ export class Executor {
           if (this.checkTaskCompletion(latestPlanOutput)) {
             break;
           }
+
+          // ── Intent Drift Detection (Issue 4.1) ──
+          if (latestPlanOutput?.result) {
+            const drift = await this.intentAnchoring.detectDrift(
+              latestPlanOutput.result.reasoning || '',
+              latestPlanOutput.result.next_steps || '',
+            );
+            if (drift.isDrifting && drift.score > 0.7) {
+              logger.error(`Critical Intent Drift Detected: ${drift.reason}`);
+              context.auditLogger?.logThreat({
+                sessionId: context.taskId,
+                taskId: context.taskId,
+                stepNumber: context.nSteps,
+                sourceUrl: (await context.browserContext.getURL()) || '',
+                threatType: 'task_override',
+                severity: 'critical',
+                rawFragment: `Reasoning: ${latestPlanOutput.result.reasoning}, Plan: ${latestPlanOutput.result.next_steps}`,
+                sanitizedFragment: `DRIFT DETECTED: ${drift.reason}`,
+                wasBlocked: false, // We log it, but don't hard-block yet in this prototype
+                detectionLayer: 'intent_anchoring',
+              });
+            }
+          }
         }
 
         // Execute navigator
@@ -264,6 +306,9 @@ export class Executor {
       const planOutput = await this.planner.execute();
       if (planOutput.result) {
         this.context.messageManager.addPlan(JSON.stringify(planOutput.result), positionForPlan);
+
+        // ── Trace Planner Reasoning (Issue 4.3) ──
+        void this.securityTracer.traceStep(context.nSteps, `PLANNER: ${planOutput.result.reasoning}`);
       }
       return planOutput;
     } catch (error) {
@@ -305,6 +350,44 @@ export class Executor {
         throw new Error(navOutput.error);
       }
       context.consecutiveFailures = 0;
+
+      // ── Behavioral Monitoring (Issue 4.2) ──
+      const lastHistoryItem = context.history.history[context.history.history.length - 1];
+      if (lastHistoryItem && lastHistoryItem.modelOutput) {
+        try {
+          const parsed = JSON.parse(lastHistoryItem.modelOutput);
+          const actions = Array.isArray(parsed.action) ? parsed.action : [];
+          for (const action of actions) {
+            if (!action) continue;
+            const actionName = Object.keys(action)[0];
+            const actionArgs = action[actionName];
+            const currentUrl = (await this.context.browserContext.getURL()) || undefined;
+            this.behaviorAnalyzer.recordAction(this.context.nSteps, actionName, currentUrl);
+            const report = this.behaviorAnalyzer.analyse();
+            const anomaly = report.anomalies.length > 0 ? report.anomalies[0] : null;
+
+            if (anomaly) {
+              logger.warning(`Behavioral anomaly: ${anomaly.description}`);
+              // In production, might suspend. For now audit log.
+              this.context.auditLogger?.logThreat({
+                sessionId: context.taskId,
+                taskId: context.taskId,
+                stepNumber: context.nSteps,
+                sourceUrl: currentUrl || '',
+                threatType: anomaly.type as any,
+                severity: 'high',
+                rawFragment: JSON.stringify(action),
+                sanitizedFragment: `ANOMALY DETECTED: ${anomaly.description}`,
+                wasBlocked: false,
+                detectionLayer: 'behavioral_auditor',
+              });
+            }
+          }
+        } catch (e) {
+          logger.error('Failed to parse model output for behavioral audit', e);
+        }
+      }
+
       if (navOutput.result?.done) {
         return true;
       }

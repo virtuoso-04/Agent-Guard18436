@@ -1,6 +1,7 @@
-import type { Message } from '@extension/storage';
+import type { Message } from '@agent-guard/storage';
 import { ACTOR_PROFILES } from '../types/message';
 import { memo } from 'react';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 interface MessageListProps {
   messages: Message[];
@@ -33,49 +34,36 @@ function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlock
     console.error('No actor found');
     return <div />;
   }
+
+  const isUser = message.actor === 'user';
   const actor = ACTOR_PROFILES[message.actor as keyof typeof ACTOR_PROFILES];
   const isProgress = message.content === 'Showing progress...';
 
   return (
-    <div
-      className={`flex max-w-full gap-3 ${
-        !isSameActor
-          ? `mt-4 border-t ${isDarkMode ? 'border-sky-800/50' : 'border-sky-200/50'} pt-4 first:mt-0 first:border-t-0 first:pt-0`
-          : ''
-      }`}>
-      {!isSameActor && (
+    <div className={`flex w-full flex-col ${isUser ? 'items-end' : 'items-start'} ${!isSameActor ? 'mt-6' : 'mt-1'}`}>
+      {!isSameActor && !isUser && (
         <div
-          className="flex size-8 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: actor.iconBackground }}>
-          <img src={actor.icon} alt={actor.name} className="size-6" />
+          className={`mb-1 ml-4 text-[10px] font-bold uppercase tracking-widest ${isDarkMode ? 'text-gray-500' : 'text-guard-muted'}`}>
+          {actor.name}
         </div>
       )}
-      {isSameActor && <div className="w-8" />}
 
-      <div className="min-w-0 flex-1">
-        {!isSameActor && (
-          <div className={`mb-1 text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-            {actor.name}
+      <div className={isUser ? 'message-user' : 'message-agent'}>
+        {isProgress ? (
+          <div className="flex items-center gap-3 py-1">
+            <AiOutlineLoading3Quarters className="size-4 animate-spin text-guard-muted" />
+            <span className="text-xs font-medium text-guard-muted">Thinking...</span>
           </div>
+        ) : (
+          <div className="whitespace-pre-wrap break-words">{message.content}</div>
         )}
-
-        <div className="space-y-0.5">
-          <div className={`whitespace-pre-wrap break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            {isProgress ? (
-              <div className={`h-1 overflow-hidden rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                <div className="h-full animate-progress bg-blue-500" />
-              </div>
-            ) : (
-              message.content
-            )}
-          </div>
-          {!isProgress && (
-            <div className={`text-right text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-300'}`}>
-              {formatTimestamp(message.timestamp)}
-            </div>
-          )}
-        </div>
       </div>
+
+      {!isProgress && !isSameActor && (
+        <div className={`mt-1 ${isUser ? 'mr-4' : 'ml-4'} text-[10px] opacity-40`}>
+          {formatTimestamp(message.timestamp)}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { firewallStore } from '@extension/storage';
-import { Button } from '@extension/ui';
-import { t } from '@extension/i18n';
+import { firewallStore } from '@agent-guard/storage';
+import { Button } from '@agent-guard/ui';
+import { t } from '@agent-guard/i18n';
 
 interface FirewallSettingsProps {
   isDarkMode: boolean;
@@ -54,169 +54,97 @@ export const FirewallSettings = ({ isDarkMode }: FirewallSettingsProps) => {
   };
 
   return (
-    <section className="space-y-6">
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          {t('options_firewall_header')}
-        </h2>
+    <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="settings-card">
+        <div className="flex items-center justify-between mb-8 border-b pb-4">
+          <div>
+            <h2 className="text-lg font-bold">Network Firewall</h2>
+            <p className="text-sm opacity-60">Control which domains Agent Guard is allowed to interact with.</p>
+          </div>
+          <div className="relative inline-flex cursor-pointer items-center">
+            <input
+              id="toggle-firewall"
+              type="checkbox"
+              checked={isEnabled}
+              onChange={handleToggleFirewall}
+              className="peer sr-only"
+            />
+            <div className="peer h-7 w-12 rounded-full bg-gray-200 dark:bg-gray-700 after:absolute after:left-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:bg-guard-primary peer-checked:after:translate-x-full" />
+          </div>
+        </div>
 
         <div className="space-y-6">
-          <div
-            className={`my-6 rounded-lg border p-4 ${isDarkMode ? 'border-slate-700 bg-slate-700' : 'border-gray-200 bg-gray-100'}`}>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="toggle-firewall"
-                className={`text-base font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                {t('options_firewall_enableToggle')}
-              </label>
-              <div className="relative inline-block w-12 select-none">
-                <input
-                  type="checkbox"
-                  checked={isEnabled}
-                  onChange={handleToggleFirewall}
-                  className="sr-only"
-                  id="toggle-firewall"
-                />
-                <label
-                  htmlFor="toggle-firewall"
-                  className={`block h-6 cursor-pointer overflow-hidden rounded-full ${
-                    isEnabled ? 'bg-blue-500' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
-                  }`}>
-                  <span className="sr-only">{t('options_firewall_toggleFirewall_a11y')}</span>
-                  <span
-                    className={`block size-6 rounded-full bg-white shadow transition-transform ${
-                      isEnabled ? 'translate-x-6' : 'translate-x-0'
-                    }`}
-                  />
-                </label>
-              </div>
-            </div>
+          <div className="flex p-1 glass rounded-2xl mb-8">
+            <button
+              onClick={() => setActiveList('allow')}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                activeList === 'allow' ? 'bg-guard-primary text-white shadow-lg' : 'opacity-40 hover:opacity-100'
+              }`}>
+              Allow List
+            </button>
+            <button
+              onClick={() => setActiveList('deny')}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                activeList === 'deny' ? 'bg-guard-primary text-white shadow-lg' : 'opacity-40 hover:opacity-100'
+              }`}>
+              Deny List
+            </button>
           </div>
 
-          <div className="mb-6 mt-10 flex items-center justify-between">
-            <div className="flex space-x-2">
-              <Button
-                onClick={() => setActiveList('allow')}
-                className={`px-4 py-2 text-base ${
-                  activeList === 'allow'
-                    ? isDarkMode
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : isDarkMode
-                      ? 'bg-slate-700 text-gray-200'
-                      : 'bg-gray-200 text-gray-700'
-                }`}>
-                {t('options_firewall_allowList_header')}
-              </Button>
-              <Button
-                onClick={() => setActiveList('deny')}
-                className={`px-4 py-2 text-base ${
-                  activeList === 'deny'
-                    ? isDarkMode
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : isDarkMode
-                      ? 'bg-slate-700 text-gray-200'
-                      : 'bg-gray-200 text-gray-700'
-                }`}>
-                {t('options_firewall_denyList_header')}
-              </Button>
-            </div>
-          </div>
-
-          <div className="mb-4 flex space-x-2">
+          <div className="flex gap-3">
             <input
               id="url-input"
               type="text"
               value={newUrl}
               onChange={e => setNewUrl(e.target.value)}
               onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  handleAddUrl();
-                }
+                if (e.key === 'Enter') handleAddUrl();
               }}
-              placeholder={t('options_firewall_placeholders_domainUrl')}
-              className={`flex-1 rounded-md border px-3 py-2 text-sm ${
-                isDarkMode ? 'border-gray-600 bg-slate-700 text-white' : 'border-gray-300 bg-white text-gray-700'
-              }`}
+              placeholder="Enter domain (e.g. google.com)"
+              className={`flex-1 rounded-2xl border p-4 text-sm glass ${isDarkMode ? 'border-apple-dark-border' : 'border-apple-border'} outline-none focus:ring-2 focus:ring-guard-primary transition-all`}
             />
-            <Button
+            <button
               onClick={handleAddUrl}
-              className={`px-4 py-2 text-sm ${
-                isDarkMode ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-500 text-white hover:bg-green-600'
-              }`}>
-              {t('options_firewall_btnAdd')}
-            </Button>
+              className="px-8 py-4 rounded-2xl bg-guard-primary text-white text-xs font-bold uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 shadow-lg">
+              Add Domain
+            </button>
           </div>
 
-          <div className="max-h-64 overflow-y-auto">
-            {activeList === 'allow' ? (
-              allowList.length > 0 ? (
-                <ul className="space-y-2">
-                  {allowList.map(url => (
-                    <li
-                      key={url}
-                      className={`flex items-center justify-between rounded-md p-2 pr-0 ${
-                        isDarkMode ? 'bg-slate-700' : 'bg-gray-100'
-                      }`}>
-                      <span className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{url}</span>
-                      <Button
-                        onClick={() => handleRemoveUrl(url, 'allow')}
-                        className={`rounded-l-none px-2 py-1 text-xs ${
-                          isDarkMode
-                            ? 'bg-red-600 text-white hover:bg-red-700'
-                            : 'bg-red-500 text-white hover:bg-red-600'
-                        }`}>
-                        {t('options_firewall_btnRemove')}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className={`text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {t('options_firewall_allowList_empty')}
-                </p>
-              )
-            ) : denyList.length > 0 ? (
-              <ul className="space-y-2">
-                {denyList.map(url => (
-                  <li
-                    key={url}
-                    className={`flex items-center justify-between rounded-md p-2 pr-0 ${
-                      isDarkMode ? 'bg-slate-700' : 'bg-gray-100'
-                    }`}>
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{url}</span>
-                    <Button
-                      onClick={() => handleRemoveUrl(url, 'deny')}
-                      className={`rounded-l-none px-2 py-1 text-xs ${
-                        isDarkMode ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-500 text-white hover:bg-red-600'
-                      }`}>
-                      Remove
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className={`text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                {t('options_firewall_denyList_empty')}
-              </p>
+          <div className="max-h-80 overflow-y-auto pr-2 space-y-2">
+            {(activeList === 'allow' ? allowList : denyList).map(url => (
+              <div
+                key={url}
+                className="flex items-center justify-between glass p-4 rounded-2xl animate-in slide-in-from-left-2 duration-200">
+                <span className="text-sm font-medium">{url}</span>
+                <button
+                  onClick={() => handleRemoveUrl(url, activeList)}
+                  className="text-apple-dark-red opacity-60 hover:opacity-100 p-2">
+                  ✕
+                </button>
+              </div>
+            ))}
+            {(activeList === 'allow' ? allowList : denyList).length === 0 && (
+              <div className="text-center py-12 opacity-30 italic text-sm">No domains in this list yet.</div>
             )}
           </div>
         </div>
       </div>
 
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          {t('options_firewall_howItWorks_header')}
-        </h2>
-        <ul className={`list-disc space-y-2 pl-5 text-left text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-          {t('options_firewall_howItWorks')
-            .split('\n')
-            .map((rule, index) => (
-              <li key={index}>{rule}</li>
-            ))}
+      <div className="settings-card opacity-80">
+        <h3 className="text-sm font-bold uppercase tracking-widest opacity-40 mb-4">Security Rules</h3>
+        <ul className="space-y-3">
+          <li className="text-xs flex gap-3">
+            <span className="text-guard-primary font-bold">01</span>
+            <span className="opacity-80">The Allow List takes precedence over all other network rules.</span>
+          </li>
+          <li className="text-xs flex gap-3">
+            <span className="text-guard-primary font-bold">02</span>
+            <span className="opacity-80">Wildcards are supported (e.g. *.example.com).</span>
+          </li>
+          <li className="text-xs flex gap-3">
+            <span className="text-guard-primary font-bold">03</span>
+            <span className="opacity-80">Agent Guard will block all navigation to domains in the Deny List.</span>
+          </li>
         </ul>
       </div>
     </section>

@@ -20,6 +20,7 @@ import { DOMElementNode, type DOMState } from './dom/views';
 import { type BrowserContextConfig, DEFAULT_BROWSER_CONTEXT_CONFIG, type PageState, URLNotAllowedError } from './views';
 import { createLogger } from '@src/background/log';
 import { ClickableElementProcessor } from './dom/clickable/service';
+import { domTaintAnalyzer } from '../services/security/content/domTaint';
 import { isUrlAllowed } from './util';
 
 const logger = createLogger('Page');
@@ -423,6 +424,9 @@ export default class Page {
 
       // update the state
       this._state.elementTree = content.elementTree;
+      // REDACT SENSITIVE DATA (Phase 2.3)
+      domTaintAnalyzer.redactSensitiveAttributes(this._state.elementTree);
+
       this._state.selectorMap = content.selectorMap;
       this._state.url = this._puppeteerPage?.url() || '';
       this._state.title = (await this._puppeteerPage?.title()) || '';

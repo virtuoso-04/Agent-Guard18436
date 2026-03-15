@@ -1,5 +1,5 @@
 {
-  "name": "@extension/options",
+  "name": "@agent-guard/options",
   "version": "0.1.13",
   "description": "chrome extension - options",
   "private": true,
@@ -19,18 +19,18 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@extension/shared": "workspace:*",
-    "@extension/storage": "workspace:*",
-    "@extension/ui": "workspace:*",
-    "@extension/i18n": "workspace:*",
-    "react-icons": "^5.0.0"
+    "@agent-guard/i18n": "workspace:*",
+    "@agent-guard/shared": "workspace:*",
+    "@agent-guard/storage": "workspace:*",
+    "@agent-guard/ui": "workspace:*",
+    "react-icons": "^5.6.0"
   },
   "devDependencies": {
-    "@extension/tailwindcss-config": "workspace:*",
-    "@extension/tsconfig": "workspace:*",
-    "@extension/vite-config": "workspace:*",
-    "postcss-load-config": "^6.0.1",
-    "cross-env": "^7.0.3"
+    "@agent-guard/tailwindcss-config": "workspace:*",
+    "@agent-guard/tsconfig": "workspace:*",
+    "@agent-guard/vite-config": "workspace:*",
+    "cross-env": "^7.0.3",
+    "postcss-load-config": "^6.0.1"
   },
   "postcss": {
     "plugins": {

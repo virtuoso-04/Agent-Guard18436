@@ -17,10 +17,19 @@ export type ThreatCategory =
   | 'prompt_injection'
   | 'sensitive_data'
   | 'dangerous_action'
-  | 'history_tamper';
+  | 'history_tamper'
+  | 'malicious_navigation';
 
 /** Which layer of the pipeline detected the threat */
-export type DetectionLayer = 'sanitizer' | 'message_manager' | 'action_validator' | 'provenance_check';
+export type DetectionLayer =
+  | 'sanitizer'
+  | 'message_manager'
+  | 'action_validator'
+  | 'provenance_check'
+  | 'phishing_detector'
+  | 'ip_protection'
+  | 'intent_anchoring'
+  | 'behavioral_auditor';
 
 /**
  * A single threat detection event persisted to the audit log.
@@ -54,4 +63,8 @@ export interface ThreatEvent {
   detectionLayer: DetectionLayer;
   /** Stable rule id (e.g. "task_override_ignore") for cross-referencing patterns */
   ruleId?: string;
+  /** Cryptographic chaining: SHA-256 hash of the previous log entry. Null for first entry. */
+  previousHash: string | null;
+  /** HMAC-SHA256 signature of the current entry (all fields except this one) */
+  signature?: string;
 }

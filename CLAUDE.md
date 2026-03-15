@@ -13,7 +13,7 @@ Read these before making non-trivial changes:
 
 ## Project Overview
 
-Nanobrowser is an open-source AI web automation Chrome extension that runs multi-agent systems locally in the browser. It's a free alternative to OpenAI Operator with support for multiple LLM providers (OpenAI, Anthropic, Gemini, Ollama, etc.).
+Agent Guard is an open-source AI web automation Chrome extension that runs multi-agent systems locally in the browser. It's a free alternative to OpenAI Operator with support for multiple LLM providers (OpenAI, Anthropic, Gemini, Ollama, etc.).
 
 ## Development Commands
 
@@ -182,7 +182,7 @@ Follow the structured naming pattern: `component_category_specificAction_state`
 ### Usage
 
 ```typescript
-import { t } from '@extension/i18n';
+import { t } from '@agent-guard/i18n';
 
 // Simple message
 t('bg_errors_noTabId')
@@ -220,7 +220,7 @@ Use Chrome i18n placeholder format with proper definitions:
 ### Generation
 
 - Do not edit generated files under `packages/i18n/lib/**`.
-- The generator `packages/i18n/genenrate-i18n.mjs` runs via the `@extension/i18n`
+- The generator `packages/i18n/genenrate-i18n.mjs` runs via the `@agent-guard/i18n`
   workspace `ready`/`build` scripts to (re)generate types and runtime helpers.
   Edit source locale JSON in `packages/i18n/locales/**` instead.
 

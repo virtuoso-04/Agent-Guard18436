@@ -1,78 +1,81 @@
-/* Add this at the top of the file */
+:root {
+  --guard-primary: #6366f1;
+  --guard-muted: #64748b;
+  --guard-surface: #f8fafc;
+  --apple-dark-bg: rgba(18, 18, 18, 0.75);
+  --apple-light-bg: rgba(255, 255, 255, 0.7);
+  --apple-border: rgba(0, 0, 0, 0.05);
+  --apple-dark-border: rgba(255, 255, 255, 0.08);
+  --quirky-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --safe-green: #10b981;
+  --elevated-yellow: #f59e0b;
+  --high-orange: #f97316;
+  --critical-red: #ef4444;
+}
+
 body {
-  border-color: rgb(159, 6, 11) !important; /* sky-200 color */
+  margin: 0;
+  padding: 0;
+  background-color: #f2f2f7;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.015em;
 }
 
-/* Remove unused classes: .App, .App-logo, .App-header */
-
-code {
-  background: rgba(186, 230, 253, 0.4);
-  border-radius: 0.25rem;
-  padding: 0.2rem 0.5rem;
-  color: #0369a1;
-}
-
-/* Dark mode support for code */
 @media (prefers-color-scheme: dark) {
-  code {
-    background: rgba(30, 58, 138, 0.4);
-    color: #7dd3fc;
+  body {
+    background-color: #000000;
+    color: #f5f5f7;
   }
 }
 
-/* Scrollbar styles */
-::-webkit-scrollbar {
-  width: 8px;
+/* Glassmorphism Classes */
+.glass {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background-color: var(--apple-light-bg);
+  border: 1px solid var(--apple-border);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #0ea5e9;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #0284c7;
-}
-
-/* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-track {
-    background: #1e293b;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: #0ea5e9;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: #38bdf8;
+  .glass {
+    background-color: var(--apple-dark-bg);
+    border: 1px solid var(--apple-dark-border);
   }
 }
 
-/* Used classes from the component */
+/* Header Redesign */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background-color: transparent;
-  border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+  background-color: rgba(242, 242, 247, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 0.5px solid var(--apple-border);
 }
 
-/* Dark mode header border */
 @media (prefers-color-scheme: dark) {
   .header {
-    border-bottom: 1px solid rgba(14, 165, 233, 0.3);
+    background-color: rgba(0, 0, 0, 0.8);
+    border-bottom: 0.5px solid var(--apple-dark-border);
   }
 }
 
 .header-logo {
-  display: flex;
-  align-items: center;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
 }
 
 .header-icons {
@@ -82,84 +85,139 @@ code {
 }
 
 .header-icon {
-  color: #19C2FF;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  color: #1d1d1f;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  transition: color 0.2s ease;
-  opacity: 0.8;
+}
+
+@media (prefers-color-scheme: dark) {
+  .header-icon {
+    background: rgba(255, 255, 255, 0.05);
+    color: #f5f5f7;
+  }
 }
 
 .header-icon:hover {
-  color: #0073DC;
-  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
-.send-button {
-  color: #19C2FF;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  opacity: 0.8;
+/* Chat Bubbles Overhaul */
+.message-user {
+  max-width: 80%;
+  align-self: flex-end;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 18px 18px 4px 18px;
+  margin: 6px 0;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
-.send-button:hover {
-  color: #0073DC;
-  opacity: 1;
+.message-agent {
+  max-width: 85%;
+  align-self: flex-start;
+  background-color: white;
+  color: #1d1d1f;
+  padding: 12px 18px;
+  border-radius: 18px 18px 18px 4px;
+  margin: 6px 0;
+  border: 0.5px solid var(--apple-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
-.send-button:disabled {
-  color: #CBD5E1;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* Add these styles to your existing CSS */
-.scrollbar-gutter-stable {
-  scrollbar-gutter: stable;
-}
-
-/* Optional: Style the scrollbar for webkit browsers */
-.scrollbar-gutter-stable::-webkit-scrollbar {
-  width: 8px;
-}
-
-.scrollbar-gutter-stable::-webkit-scrollbar-track {
-  background: #f1f5f9;  /* sky-50 */
-}
-
-.scrollbar-gutter-stable::-webkit-scrollbar-thumb {
-  background: #7dd3fc;  /* sky-300 - very light blue */
-  border-radius: 4px;
-}
-
-.scrollbar-gutter-stable::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;  /* sky-400 - slightly darker on hover */
-}
-
-/* Dark mode scrollbar for scrollbar-gutter-stable */
 @media (prefers-color-scheme: dark) {
-  .scrollbar-gutter-stable::-webkit-scrollbar-track {
-    background: #1e293b;  /* slate-800 */
-  }
-  
-  .scrollbar-gutter-stable::-webkit-scrollbar-thumb {
-    background: #0ea5e9;  /* sky-500 */
-  }
-  
-  .scrollbar-gutter-stable::-webkit-scrollbar-thumb:hover {
-    background: #38bdf8;  /* sky-400 */
+  .message-agent {
+    background-color: #1c1c1e;
+    color: #f5f5f7;
+    border-color: var(--apple-dark-border);
   }
 }
 
-/* Dark mode text and background colors */
+/* Input Area Redesign */
+.input-container {
+  padding: 1rem 1.25rem 2rem 1.25rem;
+  background: linear-gradient(to top, var(--apple-light-bg), transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 @media (prefers-color-scheme: dark) {
-  .dark-mode-text {
-    color: #e2e8f0 !important; /* slate-200 */
-  }
-  
-  .dark-mode-bg {
-    background-color: #1e293b !important; /* slate-800 */
-  }
-  
-  .dark-mode-border {
-    border-color: #475569 !important; /* slate-600 */
+  .input-container {
+    background: linear-gradient(to top, var(--apple-dark-bg), transparent);
   }
 }
+
+.input-box {
+  background: white;
+  border: 0.5px solid var(--apple-border);
+  border-radius: 24px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .input-box {
+    background: #2c2c2e;
+    border-color: var(--apple-dark-border);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.input-box:focus-within {
+  border-color: var(--guard-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.chat-input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 8px 4px;
+  flex: 1;
+}
+
+/* Suggested Prompt Cards */
+.suggestion-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.suggestion-card:hover {
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Animations */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

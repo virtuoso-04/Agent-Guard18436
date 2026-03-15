@@ -28,43 +28,33 @@ export interface SecurityBadgeProps {
   eventSummary?: string[];
 }
 
-const LEVEL_CONFIG: Record<SecurityLevel, { label: string; bg: string; text: string; border: string; pulse: boolean }> =
-  {
-    [SecurityLevel.NORMAL]: {
-      label: 'Secure',
-      bg: 'bg-green-100 dark:bg-green-900/30',
-      text: 'text-green-700 dark:text-green-300',
-      border: 'border-green-300 dark:border-green-700',
-      pulse: false,
-    },
-    [SecurityLevel.ELEVATED]: {
-      label: 'Elevated',
-      bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-      text: 'text-yellow-700 dark:text-yellow-300',
-      border: 'border-yellow-300 dark:border-yellow-700',
-      pulse: false,
-    },
-    [SecurityLevel.HIGH]: {
-      label: 'High Risk',
-      bg: 'bg-orange-100 dark:bg-orange-900/30',
-      text: 'text-orange-700 dark:text-orange-300',
-      border: 'border-orange-300 dark:border-orange-700',
-      pulse: false,
-    },
-    [SecurityLevel.CRITICAL]: {
-      label: 'Critical',
-      bg: 'bg-red-100 dark:bg-red-900/30',
-      text: 'text-red-700 dark:text-red-300',
-      border: 'border-red-300 dark:border-red-700',
-      pulse: true,
-    },
-  };
+const LEVEL_CONFIG: Record<SecurityLevel, { label: string; color: string; pulse: boolean }> = {
+  [SecurityLevel.NORMAL]: {
+    label: 'Secure',
+    color: 'var(--safe-green)',
+    pulse: false,
+  },
+  [SecurityLevel.ELEVATED]: {
+    label: 'Elevated',
+    color: 'var(--elevated-yellow)',
+    pulse: false,
+  },
+  [SecurityLevel.HIGH]: {
+    label: 'High Risk',
+    color: 'var(--high-orange)',
+    pulse: false,
+  },
+  [SecurityLevel.CRITICAL]: {
+    label: 'Critical',
+    color: 'var(--critical-red)',
+    pulse: true,
+  },
+};
 
 export default function SecurityBadge({ level, detectionCount, eventSummary = [] }: SecurityBadgeProps) {
   const [expanded, setExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close tooltip when user clicks outside the badge container
   useEffect(() => {
     if (!expanded) return;
     function handleClickOutside(e: MouseEvent) {
@@ -76,7 +66,6 @@ export default function SecurityBadge({ level, detectionCount, eventSummary = []
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [expanded]);
 
-  // Don't render anything when there are no threats and we are at NORMAL level
   if (level === SecurityLevel.NORMAL && detectionCount === 0) {
     return null;
   }
@@ -87,59 +76,44 @@ export default function SecurityBadge({ level, detectionCount, eventSummary = []
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setExpanded(prev => !prev)}
-        aria-expanded={expanded}
-        aria-haspopup="true"
-        aria-label={`Security level: ${config.label}. ${detectionCount} threat(s) detected. Click for details.`}
-        className={[
-          'flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all',
-          config.bg,
-          config.text,
-          config.border,
-          // motion-safe: respects prefers-reduced-motion OS setting
-          config.pulse ? 'motion-safe:animate-pulse' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}>
-        {/* Dot indicator */}
-        <span
-          className={[
-            'inline-block h-2 w-2 rounded-full',
-            level === SecurityLevel.NORMAL ? 'bg-green-500' : '',
-            level === SecurityLevel.ELEVATED ? 'bg-yellow-500' : '',
-            level === SecurityLevel.HIGH ? 'bg-orange-500' : '',
-            level === SecurityLevel.CRITICAL ? 'bg-red-500' : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        />
+        className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider glass transition-all hover:scale-105 active:scale-95 ${config.pulse ? 'animate-pulse' : ''}`}
+        style={{ color: config.color, borderColor: config.color }}>
+        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: config.color }} />
         <span>{config.label}</span>
         {detectionCount > 0 && (
-          <span className="ml-0.5 rounded-full bg-white/50 px-1 dark:bg-black/20">{detectionCount}</span>
+          <span className="ml-1 rounded-full bg-black/5 px-1.5 dark:bg-white/10">{detectionCount}</span>
         )}
       </button>
 
-      {/* Expandable threat summary */}
       {expanded && (
-        <div
-          className={[
-            'absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border p-3 shadow-lg',
-            'bg-white dark:bg-gray-800',
-            config.border,
-          ].join(' ')}>
-          <p className={`mb-2 text-xs font-semibold ${config.text}`}>Security Level: {config.label}</p>
-          {eventSummary.length > 0 ? (
-            <ul className="space-y-1">
-              {eventSummary.map((event, i) => (
-                <li key={i} className="text-xs text-gray-600 dark:text-gray-300">
-                  • {event}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {detectionCount} threat(s) detected. Check the Security tab in settings for details.
-            </p>
-          )}
+        <div className="absolute right-0 top-full z-[100] mt-2 w-64 rounded-2xl glass p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <p className="mb-3 text-xs font-bold uppercase tracking-widest opacity-60">Security Analysis</p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: config.color }} />
+            <span className="text-sm font-semibold">{config.label}</span>
+          </div>
+
+          <div className="space-y-3">
+            {eventSummary.length > 0 ? (
+              <ul className="space-y-2">
+                {eventSummary.map((event, i) => (
+                  <li key={i} className="text-xs leading-relaxed opacity-80">
+                    • {event}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs leading-relaxed opacity-70">
+                {detectionCount} potential threat(s) neutralized. System integrity maintained by Agent Guard.
+              </p>
+            )}
+
+            <button
+              onClick={() => chrome.runtime.openOptionsPage()}
+              className="w-full mt-2 py-2 text-[10px] font-bold uppercase tracking-widest text-guard-primary hover:underline">
+              View Detailed Logs
+            </button>
+          </div>
         </div>
       )}
     </div>

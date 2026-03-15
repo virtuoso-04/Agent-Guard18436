@@ -1,8 +1,8 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HumanMessage } from '@langchain/core/messages';
 import { createLogger } from '../log';
-import { type ProviderConfig, speechToTextModelStore } from '@extension/storage';
-import { t } from '@extension/i18n';
+import { type ProviderConfig, speechToTextModelStore } from '@agent-guard/storage';
+import { t } from '@agent-guard/i18n';
 
 const logger = createLogger('SpeechToText');
 
