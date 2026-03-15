@@ -59,7 +59,25 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       external: [
         'chrome',
-        // 'chromium-bidi/lib/cjs/bidiMapper/BidiMapper.js'
+        // Puppeteer's browser management package is Node.js-only and should not
+        // be bundled into the extension IIFE — only puppeteer-core/browser is used.
+        '@puppeteer/browsers',
+        'proxy-agent',
+        'node:url',
+        'node:http',
+        'node:https',
+        'node:fs',
+        'node:path',
+        'node:stream',
+        'node:net',
+        'node:tls',
+        'node:events',
+        'node:util',
+        'node:os',
+        'node:crypto',
+        'node:buffer',
+        'node:assert',
+        'node:zlib',
       ],
     },
   },

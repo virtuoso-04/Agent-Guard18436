@@ -19,6 +19,7 @@ export enum ProviderTypeEnum {
   Groq = 'groq',
   Cerebras = 'cerebras',
   Llama = 'llama',
+  HuggingFace = 'huggingface',
   CustomOpenAI = 'custom_openai',
 }
 
@@ -48,6 +49,18 @@ export const llmProviderModelNames = {
     'Llama-3.3-8B-Instruct',
     'Llama-4-Maverick-17B-128E-Instruct-FP8',
     'Llama-4-Scout-17B-16E-Instruct-FP8',
+  ],
+  // HuggingFace Inference API — OpenAI-compatible endpoint
+  // Models curated for high token limits and strong browser-agent reasoning
+  [ProviderTypeEnum.HuggingFace]: [
+    'Qwen/Qwen2.5-72B-Instruct', // 128K ctx — best OSS planner
+    'Qwen/Qwen2.5-32B-Instruct', // 32K ctx — balanced performance
+    'mistralai/Mistral-Small-3.1-24B-Instruct-2503', // 128K ctx — fast navigator
+    'meta-llama/Llama-3.3-70B-Instruct', // 128K ctx — general purpose
+    'meta-llama/Llama-3.1-8B-Instruct', // 8K ctx — lightweight fallback
+    'microsoft/Phi-4-reasoning-plus', // 16K ctx — compact & fast
+    'deepseek-ai/DeepSeek-V3-0324', // 64K ctx — strong reasoning
+    'google/gemma-3-27b-it', // 8K ctx — Gemma 3 instruction
   ],
   // Custom OpenAI providers don't have predefined models as they are user-defined
 };
@@ -152,6 +165,17 @@ export const llmProviderParameters = {
     [AgentNameEnum.Navigator]: {
       temperature: 0.3,
       topP: 0.85,
+    },
+  },
+  // HuggingFace — tuned for instruction-following OSS models
+  [ProviderTypeEnum.HuggingFace]: {
+    [AgentNameEnum.Planner]: {
+      temperature: 0.6,
+      topP: 0.9,
+    },
+    [AgentNameEnum.Navigator]: {
+      temperature: 0.2,
+      topP: 0.8,
     },
   },
 };

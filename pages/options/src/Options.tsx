@@ -9,6 +9,7 @@ import { AnalyticsSettings } from './components/AnalyticsSettings';
 import { SecurityLogSettings } from './components/SecurityLogSettings';
 import { PoisoningTimeline } from './components/PoisoningTimeline';
 import { SecurityDashboard } from './components/SecurityDashboard';
+import { MCPSettings } from './components/MCPSettings';
 import {
   FiSettings,
   FiCpu,
@@ -18,13 +19,24 @@ import {
   FiLock,
   FiActivity,
   FiBarChart2,
+  FiTool,
 } from 'react-icons/fi';
 
-type TabTypes = 'general' | 'models' | 'firewall' | 'security' | 'analytics' | 'timeline' | 'dashboard' | 'help';
+type TabTypes =
+  | 'general'
+  | 'models'
+  | 'firewall'
+  | 'security'
+  | 'analytics'
+  | 'timeline'
+  | 'dashboard'
+  | 'mcp'
+  | 'help';
 
 const TABS: { id: TabTypes; icon: React.ComponentType<{ className?: string }>; label: string }[] = [
   { id: 'general', icon: FiSettings, label: t('options_tabs_general') },
   { id: 'models', icon: FiCpu, label: t('options_tabs_models') },
+  { id: 'mcp', icon: FiTool, label: 'MCP Tools' },
   { id: 'firewall', icon: FiShield, label: t('options_tabs_firewall') },
   { id: 'security', icon: FiLock, label: 'Security Log' },
   { id: 'timeline', icon: FiActivity, label: 'Poisoning Timeline' },
@@ -63,6 +75,8 @@ const Options = () => {
         return <GeneralSettings isDarkMode={isDarkMode} />;
       case 'models':
         return <ModelSettings isDarkMode={isDarkMode} />;
+      case 'mcp':
+        return <MCPSettings isDarkMode={isDarkMode} />;
       case 'firewall':
         return <FirewallSettings isDarkMode={isDarkMode} />;
       case 'security':

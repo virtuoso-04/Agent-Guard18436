@@ -30,6 +30,7 @@ import { AuditLogger } from '../services/security/content/auditLogger';
 import { IntentAnchoring } from '../services/security/behavior/intentAnchoring';
 import { BehaviorAnalyzer, createBehaviorAnalyzer } from '../services/security/behavior/behaviorAnalyzer';
 import { SecurityTracer } from '../services/security/behavior/securityTracer';
+import type { ModelRouter } from './routing/router';
 
 const logger = createLogger('Executor');
 
@@ -38,11 +39,14 @@ export interface ExecutorExtraArgs {
   extractorLLM?: BaseChatModel;
   agentOptions?: Partial<AgentOptions>;
   generalSettings?: GeneralSettingsConfig;
+  /** Optional multi-model router. When present, both agent proxies are updated before each step. */
+  modelRouter?: ModelRouter;
 }
 
 export class Executor {
   private readonly navigator: NavigatorAgent;
   private readonly planner: PlannerAgent;
+  private readonly modelRouter: ModelRouter | undefined;
   private readonly context: AgentContext;
   private readonly plannerPrompt: PlannerPrompt;
   private readonly navigatorPrompt: NavigatorPrompt;
@@ -88,12 +92,18 @@ export class Executor {
     this.navigatorPrompt = new NavigatorPrompt(context.options.maxActionsPerStep);
     this.plannerPrompt = new PlannerPrompt();
 
+    // When a ModelRouter is provided, agents use its proxies so the router can
+    // swap the active model each step without the agents knowing.
+    this.modelRouter = extraArgs?.modelRouter;
+    const effectiveNavigatorLLM = this.modelRouter ? this.modelRouter.navigatorProxy : navigatorLLM;
+    const effectivePlannerLLM = this.modelRouter ? this.modelRouter.plannerProxy : plannerLLM;
+
     const actionBuilder = new ActionBuilder(context, extractorLLM);
     const navigatorActionRegistry = new NavigatorActionRegistry(actionBuilder.buildDefaultActions());
 
     // Initialize agents with their respective prompts
     this.navigator = new NavigatorAgent(navigatorActionRegistry, {
-      chatLLM: navigatorLLM,
+      chatLLM: effectiveNavigatorLLM,
       context: context,
       prompt: this.navigatorPrompt,
     });
@@ -114,7 +124,7 @@ export class Executor {
     }
 
     this.planner = new PlannerAgent({
-      chatLLM: plannerLLM,
+      chatLLM: effectivePlannerLLM,
       context: context,
       prompt: this.plannerPrompt,
     });
@@ -182,6 +192,14 @@ export class Executor {
           stepNumber: context.nSteps,
           maxSteps: context.options.maxSteps,
         };
+
+        // ── Multi-model routing: pick the best model for this step ──
+        this.modelRouter?.route({
+          step: context.nSteps,
+          tokenUsage: context.messageManager.getTotalTokens(),
+          maxTokens: context.options.maxInputTokens,
+          consecutiveFailures: context.consecutiveFailures,
+        });
 
         logger.info(`🔄 Step ${step + 1} / ${allowedMaxSteps}`);
         if (await this.shouldStop()) {

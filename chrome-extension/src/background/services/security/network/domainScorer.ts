@@ -1,4 +1,4 @@
-import { normalizeHomoglyphs } from '../../content/confusables';
+import { normalizeHomoglyphs } from '../content/confusables';
 import { TOP_PHISHING_TARGETS } from './topDomains';
 
 export interface LookalikeScoringResult {

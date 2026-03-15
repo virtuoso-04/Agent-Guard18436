@@ -222,6 +222,10 @@ export default class MessageManager {
     return this.history.messages.length;
   }
 
+  public getTotalTokens(): number {
+    return this.history.totalTokens;
+  }
+
   /**
    * Adds a new task to execute, it will be executed based on the history
    * @param newTask - The raw description of the new task

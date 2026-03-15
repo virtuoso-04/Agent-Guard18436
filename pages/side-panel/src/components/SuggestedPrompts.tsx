@@ -32,6 +32,41 @@ const SUGGESTIONS = [
     prompt: 'Navigate to Reuters and summarize the latest 5 articles related to artificial intelligence',
     icon: '📈',
   },
+  {
+    title: 'Price Compare',
+    description: 'Compare prices across stores',
+    prompt:
+      'Search Amazon, Best Buy, and Walmart for the MacBook Air M3 and return a side-by-side price and availability comparison',
+    icon: '💸',
+  },
+  {
+    title: 'Job Scout',
+    description: 'Find engineering roles this week',
+    prompt:
+      'Go to LinkedIn Jobs and find 5 software engineering positions in San Francisco posted in the last 7 days. For each, extract the job title, company name, and salary range if listed',
+    icon: '💼',
+  },
+  {
+    title: 'Competitor Intel',
+    description: 'Compare SaaS pricing pages',
+    prompt:
+      'Visit the pricing pages of Notion, Coda, and Confluence and create a feature comparison table covering price tiers, storage limits, and collaboration features',
+    icon: '🔍',
+  },
+  {
+    title: 'Research Brief',
+    description: 'Multi-source topic summary',
+    prompt:
+      'Search for the latest developments in large language model reasoning on Wikipedia, ArXiv, and a major tech news site. Write a concise 3-paragraph briefing with key findings',
+    icon: '🧠',
+  },
+  {
+    title: 'Travel Deals',
+    description: 'Find cheap flights next month',
+    prompt:
+      'Go to Google Flights and find the 3 cheapest round-trip flights from New York JFK to London Heathrow for next month. List dates, airlines, and total price',
+    icon: '✈️',
+  },
 ];
 
 const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({ onSelect, isDarkMode = false }) => {

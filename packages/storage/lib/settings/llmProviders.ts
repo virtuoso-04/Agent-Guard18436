@@ -67,6 +67,7 @@ export function getProviderTypeByProviderId(providerId: string): ProviderTypeEnu
     case ProviderTypeEnum.OpenRouter:
     case ProviderTypeEnum.Groq:
     case ProviderTypeEnum.Cerebras:
+    case ProviderTypeEnum.HuggingFace:
       return providerId;
     default:
       return ProviderTypeEnum.CustomOpenAI;
@@ -99,8 +100,10 @@ export function getDefaultDisplayNameFromProviderId(providerId: string): string 
       return 'Cerebras';
     case ProviderTypeEnum.Llama:
       return 'Llama';
+    case ProviderTypeEnum.HuggingFace:
+      return 'HuggingFace';
     default:
-      return providerId; // Use the provider id as display name for custom providers by default
+      return providerId;
   }
 }
 
@@ -127,6 +130,17 @@ export function getDefaultProviderConfig(providerId: string): ProviderConfig {
               ? 'https://api.llama.com/v1'
               : undefined,
         modelNames: [...(llmProviderModelNames[providerId] || [])],
+        createdAt: Date.now(),
+      };
+
+    case ProviderTypeEnum.HuggingFace:
+      return {
+        apiKey: '',
+        name: 'HuggingFace',
+        type: ProviderTypeEnum.HuggingFace,
+        // HuggingFace Inference API is OpenAI-compatible at this base URL
+        baseUrl: 'https://api-inference.huggingface.co/v1',
+        modelNames: [...(llmProviderModelNames[ProviderTypeEnum.HuggingFace] || [])],
         createdAt: Date.now(),
       };
 

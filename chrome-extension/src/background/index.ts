@@ -18,6 +18,7 @@ import { DEFAULT_AGENT_OPTIONS } from './agent/types';
 import { SpeechToTextService } from './services/speechToText';
 import { injectBuildDomTreeScripts } from './browser/dom/service';
 import { analytics } from './services/analytics';
+import { ModelRouter, buildCandidates } from './agent/routing/router';
 
 const logger = createLogger('background');
 
@@ -308,10 +309,29 @@ async function setupExecutor(taskId: string, task: string, browserContext: Brows
   let plannerLLM: BaseChatModel | null = null;
   const plannerModel = agentModels[AgentNameEnum.Planner];
   if (plannerModel) {
-    // Log the provider config being used for the planner
     const plannerProviderConfig = providers[plannerModel.provider];
     plannerLLM = createChatModel(plannerProviderConfig, plannerModel);
   }
+
+  // Build multi-model router when navigator and planner are distinct models.
+  // The router uses the planner as 'powerful' fallback for the navigator on
+  // repeated failures, and the navigator as 'fast' for early planner steps.
+  const effectivePlannerLLM = plannerLLM ?? navigatorLLM;
+  const navModelName = navigatorModel.modelName;
+  const planModelName = plannerModel?.modelName ?? navModelName;
+
+  const { navigatorCandidates, plannerCandidates } = buildCandidates(
+    navigatorLLM,
+    effectivePlannerLLM,
+    navModelName,
+    planModelName,
+  );
+  const modelRouter = new ModelRouter({ navigatorCandidates, plannerCandidates });
+
+  logger.info(
+    `[Router] Initialized — navigator: ${navModelName}, planner: ${planModelName}` +
+      (navigatorLLM !== effectivePlannerLLM ? ' (cross-model fallback enabled)' : ' (single-model mode)'),
+  );
 
   // Apply firewall settings to browser context
   const firewall = await firewallStore.getFirewall();
@@ -334,7 +354,7 @@ async function setupExecutor(taskId: string, task: string, browserContext: Brows
   });
 
   const executor = new Executor(task, taskId, browserContext, navigatorLLM, {
-    plannerLLM: plannerLLM ?? navigatorLLM,
+    plannerLLM: effectivePlannerLLM,
     agentOptions: {
       maxSteps: generalSettings.maxSteps,
       maxFailures: generalSettings.maxFailures,
@@ -344,6 +364,7 @@ async function setupExecutor(taskId: string, task: string, browserContext: Brows
       planningInterval: generalSettings.planningInterval,
     },
     generalSettings: generalSettings,
+    modelRouter,
   });
 
   return executor;

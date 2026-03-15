@@ -69,6 +69,8 @@ export interface EventData {
   maxSteps: number;
   /** details is the content of the event */
   details: string;
+  /** Approximate tokens used in the message history at the time of this event */
+  tokenUsage?: number;
 }
 
 export class AgentEvent {

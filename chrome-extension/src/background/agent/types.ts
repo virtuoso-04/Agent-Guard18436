@@ -96,6 +96,7 @@ export class AgentContext {
       step: this.nSteps,
       maxSteps: this.options.maxSteps,
       details: eventDetails,
+      tokenUsage: this.messageManager.getTotalTokens(),
     });
     await this.eventManager.emit(event);
   }

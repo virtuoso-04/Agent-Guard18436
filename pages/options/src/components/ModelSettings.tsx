@@ -412,6 +412,9 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
     } else if (providerType === ProviderTypeEnum.Llama) {
       // Llama needs API Key and Base URL
       hasInput = Boolean(config?.apiKey?.trim()) && Boolean(config?.baseUrl?.trim());
+    } else if (providerType === ProviderTypeEnum.HuggingFace) {
+      // HuggingFace needs API token (HF_TOKEN) and base URL (pre-filled)
+      hasInput = Boolean(config?.apiKey?.trim()) && Boolean(config?.baseUrl?.trim());
     } else {
       // Other built-in providers just need API Key
       hasInput = Boolean(config?.apiKey?.trim());
@@ -436,14 +439,14 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
         return;
       }
 
-      // Check if base URL is required but missing for custom_openai, ollama, azure_openai or openrouter
-      // Note: Groq and Cerebras do not require base URL as they use the default endpoint
+      // Check if base URL is required but missing for custom_openai, ollama, azure_openai, openrouter, llama, huggingface
       if (
         (providers[provider].type === ProviderTypeEnum.CustomOpenAI ||
           providers[provider].type === ProviderTypeEnum.Ollama ||
           providers[provider].type === ProviderTypeEnum.AzureOpenAI ||
           providers[provider].type === ProviderTypeEnum.OpenRouter ||
-          providers[provider].type === ProviderTypeEnum.Llama) &&
+          providers[provider].type === ProviderTypeEnum.Llama ||
+          providers[provider].type === ProviderTypeEnum.HuggingFace) &&
         (!providers[provider].baseUrl || !providers[provider].baseUrl.trim())
       ) {
         alert(t('options_models_providers_errors_baseUrlRequired', getDefaultDisplayNameFromProviderId(provider)));
@@ -1344,12 +1347,13 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
                         </div>
                       )}
 
-                    {/* Base URL input (for custom_openai, ollama, azure_openai, openrouter, and llama) */}
+                    {/* Base URL input (for custom_openai, ollama, azure_openai, openrouter, llama, huggingface) */}
                     {(providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
                       providerConfig.type === ProviderTypeEnum.Ollama ||
                       providerConfig.type === ProviderTypeEnum.AzureOpenAI ||
                       providerConfig.type === ProviderTypeEnum.OpenRouter ||
-                      providerConfig.type === ProviderTypeEnum.Llama) && (
+                      providerConfig.type === ProviderTypeEnum.Llama ||
+                      providerConfig.type === ProviderTypeEnum.HuggingFace) && (
                       <div className="flex flex-col">
                         <div className="flex items-center">
                           <label
@@ -1360,7 +1364,6 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
                               ? t('options_models_providers_endpoint')
                               : t('options_models_providers_baseUrl')}
                             {/* Show asterisk only if required */}
-                            {/* OpenRouter has a default, so not strictly required, but needed for save button */}
                             {providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
                             providerConfig.type === ProviderTypeEnum.AzureOpenAI
                               ? '*'
@@ -1378,7 +1381,9 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
                                     ? t('options_models_providers_placeholders_baseUrl_openrouter')
                                     : providerConfig.type === ProviderTypeEnum.Llama
                                       ? t('options_models_providers_placeholders_baseUrl_llama')
-                                      : t('options_models_providers_placeholders_baseUrl_ollama')
+                                      : providerConfig.type === ProviderTypeEnum.HuggingFace
+                                        ? 'https://api-inference.huggingface.co/v1'
+                                        : t('options_models_providers_placeholders_baseUrl_ollama')
                             }
                             value={providerConfig.baseUrl || ''}
                             onChange={e => handleApiKeyChange(providerId, providerConfig.apiKey || '', e.target.value)}
@@ -1577,6 +1582,30 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
                             rel="noopener noreferrer"
                             className={`ml-1 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}>
                             {t('options_models_providers_ollama_learnMore')}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* HuggingFace: info callout explaining the HF token */}
+                    {providerConfig.type === ProviderTypeEnum.HuggingFace && (
+                      <div
+                        className={`mt-4 rounded-md border ${isDarkMode ? 'border-yellow-700 bg-yellow-900/30' : 'border-yellow-200 bg-yellow-50'} p-3`}>
+                        <p className={`text-sm ${isDarkMode ? 'text-yellow-200' : 'text-yellow-800'}`}>
+                          <strong>🤗 HuggingFace Token: </strong>
+                          Enter your{' '}
+                          <code
+                            className={`rounded ${isDarkMode ? 'bg-yellow-800 px-1 py-0.5 text-yellow-100' : 'bg-yellow-100 px-1 py-0.5 text-yellow-900'}`}>
+                            HF_TOKEN
+                          </code>{' '}
+                          (User Access Token) as the API key. The base URL is pre-filled with HuggingFace's
+                          OpenAI-compatible Inference API.{' '}
+                          <a
+                            href="https://huggingface.co/settings/tokens"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`font-medium underline ${isDarkMode ? 'text-yellow-300 hover:text-yellow-100' : 'text-yellow-700 hover:text-yellow-900'}`}>
+                            Get your token →
                           </a>
                         </p>
                       </div>

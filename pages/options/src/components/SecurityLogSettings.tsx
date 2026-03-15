@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { threatLogStore } from '@agent-guard/storage';
 import type { ThreatEvent } from '@agent-guard/storage/lib/security/types';
-import { FiShield, FiAlertTriangle, FiCheckCircle, FiClock, FiSearch, FiRefreshCw } from 'react-icons/fi';
+import { FiShield, FiAlertTriangle, FiCheckCircle, FiClock, FiSearch, FiRefreshCw, FiDownload } from 'react-icons/fi';
 
 interface SecurityLogSettingsProps {
   isDarkMode?: boolean;
@@ -33,6 +33,49 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
     loadLogs();
     return threatLogStore.subscribe(loadLogs);
   }, []);
+
+  const handleExportJSON = () => {
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agent-guard-audit-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportCSV = () => {
+    const headers = [
+      'id',
+      'timestamp',
+      'sessionId',
+      'taskId',
+      'stepNumber',
+      'sourceUrl',
+      'threatType',
+      'severity',
+      'wasBlocked',
+      'detectionLayer',
+      'ruleId',
+    ];
+    const rows = logs.map(e =>
+      headers
+        .map(h => {
+          const val = (e as unknown as Record<string, unknown>)[h];
+          const str = val === undefined || val === null ? '' : String(val);
+          return str.includes(',') || str.includes('"') || str.includes('\n') ? `"${str.replace(/"/g, '""')}"` : str;
+        })
+        .join(','),
+    );
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agent-guard-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleVerify = async () => {
     setVerificationResult({ status: 'checking' });
@@ -162,18 +205,38 @@ export const SecurityLogSettings = ({ isDarkMode = false }: SecurityLogSettingsP
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="relative group">
-        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" />
-        <input
-          type="text"
-          placeholder="Filter security events..."
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          className={`w-full rounded-2xl border py-4 pl-12 pr-4 glass ${
-            isDarkMode ? 'border-apple-dark-border' : 'border-apple-border'
-          } outline-none focus:ring-2 focus:ring-guard-primary transition-all text-sm`}
-        />
+      {/* Filter Bar + Export */}
+      <div className="flex items-center gap-3">
+        <div className="relative group flex-1">
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30 group-focus-within:opacity-100 transition-opacity" />
+          <input
+            type="text"
+            placeholder="Filter security events..."
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            className={`w-full rounded-2xl border py-4 pl-12 pr-4 glass ${
+              isDarkMode ? 'border-apple-dark-border' : 'border-apple-border'
+            } outline-none focus:ring-2 focus:ring-guard-primary transition-all text-sm`}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          disabled={logs.length === 0}
+          title="Export as CSV"
+          className={`flex items-center gap-2 rounded-2xl border px-4 py-4 text-[10px] font-bold uppercase tracking-widest glass hover:scale-105 active:scale-95 disabled:opacity-30 transition-all ${focusRingClasses}`}>
+          <FiDownload size={14} />
+          CSV
+        </button>
+        <button
+          type="button"
+          onClick={handleExportJSON}
+          disabled={logs.length === 0}
+          title="Export as JSON"
+          className={`flex items-center gap-2 rounded-2xl border px-4 py-4 text-[10px] font-bold uppercase tracking-widest glass hover:scale-105 active:scale-95 disabled:opacity-30 transition-all ${focusRingClasses}`}>
+          <FiDownload size={14} />
+          JSON
+        </button>
       </div>
 
       {/* Logs Table */}

@@ -10,6 +10,8 @@ import { ChatOllama } from '@langchain/ollama';
 import { ChatDeepSeek } from '@langchain/deepseek';
 
 const maxTokens = 1024 * 4;
+// HuggingFace models support much larger output windows — use 8K by default
+const hfMaxTokens = 1024 * 8;
 
 // Custom ChatLlama class to handle Llama API response format
 class ChatLlama extends ChatOpenAI {
@@ -355,6 +357,26 @@ export function createChatModel(providerConfig: ProviderConfig, modelConfig: Mod
           'X-Title': 'Agent Guard',
         },
       });
+    }
+    case ProviderTypeEnum.HuggingFace: {
+      // HuggingFace Inference API is fully OpenAI-compatible.
+      // The base URL is pre-configured in the provider's default config.
+      // We pass a higher maxTokens and the HF user-agent header.
+      const hfConfig = { ...providerConfig };
+      // Ensure the HF endpoint is set (fallback in case user cleared it)
+      if (!hfConfig.baseUrl) {
+        hfConfig.baseUrl = 'https://api-inference.huggingface.co/v1';
+      }
+      return createOpenAIChatModel(
+        hfConfig,
+        { ...modelConfig, parameters: { ...modelConfig.parameters, maxTokens: hfMaxTokens } },
+        {
+          headers: {
+            'X-Use-Cache': 'false', // Disable HF's inference cache for agent tasks
+            'X-Title': 'Agent Guard',
+          },
+        },
+      );
     }
     case ProviderTypeEnum.Llama: {
       // Llama API has a different response format, use custom ChatLlama class

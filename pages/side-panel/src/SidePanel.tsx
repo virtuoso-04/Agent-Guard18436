@@ -13,6 +13,7 @@ import BookmarkList from './components/BookmarkList';
 import SecurityBadge, { SecurityLevel } from './components/SecurityBadge';
 import SecurityEventStream, { type SecurityStreamEntry } from './components/SecurityEventStream';
 import SuggestedPrompts from './components/SuggestedPrompts';
+import TokenDisplay from './components/TokenDisplay';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import './SidePanel.css';
 
@@ -50,6 +51,9 @@ const SidePanel = () => {
   const [securityDetectionCount, setSecurityDetectionCount] = useState(0);
   const [securityEvents, setSecurityEvents] = useState<SecurityStreamEntry[]>([]);
   const [dismissedEventIds, setDismissedEventIds] = useState<Set<string>>(new Set());
+  // Token context usage — updated from AgentEvent.data.tokenUsage on every step
+  const [tokenUsage, setTokenUsage] = useState(0);
+  const MAX_CONTEXT_TOKENS = 128_000;
   const sessionIdRef = useRef<string | null>(null);
   const isReplayingRef = useRef<boolean>(false);
   const portRef = useRef<chrome.runtime.Port | null>(null);
@@ -457,6 +461,9 @@ const SidePanel = () => {
       portRef.current.onMessage.addListener((message: any) => {
         // Add type checking for message
         if (message && message.type === EventType.EXECUTION) {
+          if (message.data?.tokenUsage !== undefined) {
+            setTokenUsage(message.data.tokenUsage as number);
+          }
           handleTaskState(message);
         } else if (message && message.type === 'error') {
           // Handle error messages from service worker
@@ -1165,6 +1172,9 @@ const SidePanel = () => {
               <span>Agent Guard</span>
             )}
           </div>
+          {tokenUsage > 0 && (
+            <TokenDisplay tokenUsage={tokenUsage} maxTokens={MAX_CONTEXT_TOKENS} isDarkMode={isDarkMode} />
+          )}
           <div className="header-icons">
             <SecurityBadge
               level={securityLevel}
