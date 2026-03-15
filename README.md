@@ -1,274 +1,243 @@
-<h1 align="center">
-    <img src="https://github.com/user-attachments/assets/ec60b0c4-87ba-48f4-981a-c55ed0e8497b" height="100" width="375" alt="banner" /><br>
-</h1>
+# Agent-Guard
 
 <div align="center">
+  <img src="https://github.com/user-attachments/assets/ec60b0c4-87ba-48f4-981a-c55ed0e8497b" alt="Agent-Guard banner" width="420" />
 
-[![GitHub](#)](#)
-[![Twitter](#)](#)
-[![Discord](#)](#)
+  <p><strong>Security-first AI web automation built for the real browser, not a sandboxed demo.</strong></p>
 
+  <p>
+    <a href="https://github.com/virtuoso-04/Agent-Guard18436"><img src="https://img.shields.io/badge/GitHub-Agent--Guard-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+    <a href="https://github.com/virtuoso-04/Agent-Guard18436/stargazers"><img src="https://img.shields.io/github/stars/virtuoso-04/Agent-Guard18436?style=for-the-badge" alt="Stars" /></a>
+    <a href="https://github.com/virtuoso-04/Agent-Guard18436/issues"><img src="https://img.shields.io/github/issues/virtuoso-04/Agent-Guard18436?style=for-the-badge" alt="Issues" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge" alt="License" /></a>
+  </p>
 </div>
 
 ---
 
-### 🏛️ Foundation
-**Agent-Guard** is a security-first AI web automation engine. Built upon the proven multi-agent orchestration of [Nanobrowser](https://github.com/nanobrowser), Agent-Guard introduces a state-of-the-art **Security Abstraction Layer** (SAL) designed to protect users and agents from prompt injection, phishing, and model poisoning.
+## What Is Agent-Guard?
 
----
+Agent-Guard is an open-source, security-hardened browser agent based on the Nanobrowser architecture and reworked with a much stronger security posture.
 
-## 🌐 Agent-Guard
+It combines:
 
-Agent-Guard is an open-source, security-hardened AI web automation extension. It provides a robust defense layer directly in the agent runtime, ensuring that your AI agents operate within a verified, tamper-evident environment.
+- local-first browser automation
+- a multi-agent workflow
+- configurable LLM providers
+- defensive layers against prompt injection, phishing, unsafe navigation, and model manipulation
 
-⬇️ [Download Latest Release](https://github.com/TShreek/Agent-Guard18436/releases)
+The goal is simple: make AI web automation feel powerful without feeling reckless.
 
-👏 Join the community in [GitHub](https://github.com/TShreek/Agent-Guard18436/discussions)
+## Why I Built It
 
-🌟 Loving Agent-Guard? Give us a star and help spread the word!
+Most browser agents focus on capability first and safety later. Agent-Guard flips that.
 
+This project is my attempt to build an agent runtime where security is part of the execution loop itself, not just a warning banner on top. Instead of trusting every page, redirect, model output, and DOM state equally, Agent-Guard actively evaluates what is happening and tries to reduce the attack surface while the task is running.
 
-<div align="center">
-<img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="Agent-Guard Demo" />
-<p><em>Agent-Guard's multi-agent system intelligently navigating complex web workflows while maintaining a real-time security perimeter.</em></p>
-</div>
+## Core Highlights
 
-## 🔥 Why Agent-Guard?
+- **Security-first runtime**
+  Prompt injection defense, phishing-aware navigation checks, DOM integrity checks, and behavioral anomaly detection are built into the flow.
+- **Multi-agent orchestration**
+  Planner and Navigator agents work together to complete tasks while staying inside security guardrails.
+- **Interactive side panel**
+  Real-time task state, cleaner UI, security indicators, task history, replay, and suggested prompts.
+- **Bring-your-own-model**
+  Use OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, Llama, and OpenAI-compatible providers.
+- **Runs locally in the browser**
+  Your browser session and credentials stay with you.
+- **Open source and inspectable**
+  You can trace how the agent behaves, what protections exist, and where the decisions come from.
 
-Looking for a powerful AI browser agent without the $200/month price tag of OpenAI Operator — and one that actually takes security seriously? **Agent-Guard** delivers premium web automation with a security layer built into the agent runtime, not bolted on after:
+## Security Model
 
-- **100% Free** - No subscription fees or hidden costs. Use your own API keys and only pay for what you use.
-- **Security-First Architecture** - Multi-layer defenses against prompt injection, phishing, zero-click attacks, and model poisoning — running locally alongside the agents that need protecting.
-- **Privacy-Focused** - Everything runs in your local browser. Your credentials never leave your machine.
-- **Flexible LLM Options** - Connect any preferred provider and assign different models to different agents.
-- **Fully Open Source** - Complete transparency in how your browser is automated and how it's secured. No black boxes.
-
-> **Supported providers:** OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, Llama, and custom OpenAI-compatible providers.
-
-## 🔐 Security Roadmap
-
-Agent-Guard is building industry-grade security into every layer of the AI agent stack across four production-ready phases:
+Agent-Guard is organized around four security hardening phases:
 
 | Phase | Focus | Status |
-|-------|-------|--------|
-| **Phase 1** | Prompt Injection Defense & Content Integrity — multi-pass sanitization, TOON format, cryptographic message provenance, threat audit log | ✅ Completed |
-| **Phase 2** | Zero-Click Attack Prevention & DOM Integrity — element fingerprinting, action confirmation gate, DOM taint analysis, atomic state locking | ✅ Completed |
-| **Phase 3** | Phishing Detection & Navigation Trust — domain lookalike scoring, page heuristics, redirect chain auditing, smart firewall | ✅ Completed |
-| **Phase 4** | Model Poisoning Resistance — intent anchoring, behavioral anomaly detection, tamper-evident reasoning traces, operator dashboard | ✅ Completed |
+| --- | --- | --- |
+| Phase 1 | Prompt injection defense, content sanitization, threat logging | Complete |
+| Phase 2 | Zero-click attack prevention, DOM integrity, action validation | Complete |
+| Phase 3 | Phishing detection, redirect auditing, trust boundary checks | Complete |
+| Phase 4 | Model poisoning resistance, intent anchoring, behavior tracing | Complete |
 
-See the full roadmap and open issues: [Security Issues →](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity)
+This includes subsystems for:
 
-## 📊 Key Features
+- content sanitization and threat detection
+- DOM taint analysis and fingerprinting
+- redirect-chain auditing
+- suspicious domain scoring
+- credential safety checks
+- intent anchoring and anomaly detection
+- traceable security event reporting
 
-- **Multi-agent System**: Specialized AI agents (Planner + Navigator) collaborate to accomplish complex web workflows
-- **Security Event Stream**: Real-time visibility into what the security layer is detecting and blocking
-- **Interactive Side Panel**: Intuitive chat interface with real-time status updates and security badge
-- **Task Automation**: Seamlessly automate repetitive web tasks across websites, with safety guardrails
-- **Follow-up Questions**: Ask contextual follow-up questions about completed tasks
-- **Conversation History**: Easily access and manage your AI agent interaction history
-- **Task Replay**: Record and replay task execution with full integrity verification
-- **Multiple LLM Support**: Connect your preferred LLM providers and assign different models to different agents
+## UI Preview
 
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="700" alt="Agent-Guard preview" />
+  <p><em>Agent-Guard running in the browser with a security-aware side panel and guarded automation flow.</em></p>
+</div>
 
-## 🌐 Browser Support
+## What Makes This Version Different
 
-**Officially Supported:**
-- **Chrome** - Full support with all features
-- **Edge** - Full support with all features
+This repo is not just a renamed fork.
 
-**Not Supported:**
-- Firefox, Safari, and other Chromium variants (Opera, Arc, etc.)
+It includes work on:
 
-> **Note**: While Agent Guard may function on other Chromium-based browsers, we recommend using Chrome or Edge for the best experience and guaranteed compatibility.
+- a more opinionated security architecture
+- security event surfacing in the UI
+- refined side-panel and options UX
+- stronger browser-build handling for extension packaging
+- additional tests around security-focused behaviors
 
+## Tech Stack
 
-## 🚀 Quick Start
+- TypeScript
+- React
+- Vite
+- pnpm workspaces
+- Turbo
+- Chrome Extension APIs
+- Vitest
 
-1. **Configure Agent Models**:
-   * Click the Agent Guard icon in your toolbar to open the sidebar
-   * Click the **Settings** icon (top right)
-   * Add your LLM API keys
-   * Choose which model to use for different agents (Navigator, Planner)
+## Supported Providers
 
-> **Tip**: For the latest security patches, ensure you are running the latest version from our [GitHub Releases](https://github.com/TShreek/Agent-Guard18436/releases).
+Agent-Guard supports:
 
-## 🔧 Manually Install Latest Version
+- OpenAI
+- Anthropic
+- Gemini
+- Ollama
+- Groq
+- Cerebras
+- Llama
+- custom OpenAI-compatible providers
 
-To get the most recent security features:
+## Browser Support
 
-1. **Download**:
-    * Download `Agent-Guard.zip` from our [Release Page](https://github.com/TShreek/Agent-Guard18436/releases).
+Officially supported:
 
-2. **Install**:
-    * Unzip the archive.
-    * Open `chrome://extensions/` in Chrome.
-    * Enable **Developer mode** (top right).
-    * Click **Load unpacked** and select the unzipped release folder.
+- Chrome
+- Edge
 
-> **Note**: Once installed, click the Agent Guard icon in your toolbar, go to **Settings**, and add your LLM API keys to begin.
+Other Chromium browsers may work, but they are not the main target for this project.
 
-4. **Upgrading**:
-    * Download the latest `Agent Guard.zip` file from the release page.
-    * Unzip and replace your existing Agent Guard files with the new ones.
-    * Go to `chrome://extensions/` in Chrome and click the refresh icon on the Agent Guard card.
+## Quick Start
 
-## 🛠️ Build from Source
+### 1. Clone the repo
 
-If you prefer to build Agent Guard yourself, follow these steps:
+```bash
+git clone https://github.com/virtuoso-04/Agent-Guard18436.git
+cd Agent-Guard18436
+```
 
-1. **Prerequisites**:
-   * [Node.js](https://nodejs.org/) (v22.12.0 or higher)
-   * [pnpm](https://pnpm.io/installation) (v9.15.1 or higher)
+### 2. Install dependencies
 
-2. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/TShreek/Agent-Guard18436.git
-   cd Agent-Guard18436
-   ```
+```bash
+pnpm install
+```
 
-3. **Install Dependencies**:
-   ```bash
-   pnpm install
-   ```
+### 3. Build the extension
 
-4. **Build the Extension**:
-   ```bash
-   pnpm build
-   ```
+```bash
+pnpm build
+```
 
-5. **Load the Extension**:
-   * The built extension will be in the `dist` directory
-   * Follow the installation steps from the Manually Install section to load the extension into your browser
+### 4. Load it in Chrome
 
-6. **Development Mode** (optional):
-   ```bash
-   pnpm dev
-   ```
+1. Open `chrome://extensions/`
+2. Enable Developer mode
+3. Click `Load unpacked`
+4. Select the generated `dist/` directory
 
-## 🤖 Choosing Your Models
+### 5. Configure models
 
-Agent Guard allows you to configure different LLM models for each agent to balance performance and cost. Here are recommended configurations:
+Open the side panel, go to Settings, add your provider keys, and assign models to the Planner and Navigator.
 
-### Better Performance
-- **Planner**: Claude Sonnet 4
-  - Better reasoning and planning capabilities
-- **Navigator**: Claude Haiku 3.5
-  - Efficient for web navigation tasks
-  - Good balance of performance and cost
+## Development
 
-### Cost-Effective Configuration
-- **Planner**: Claude Haiku or GPT-4o
-  - Reasonable performance at lower cost
-  - May require more iterations for complex tasks
-- **Navigator**: Gemini 2.5 Flash or GPT-4o-mini
-  - Lightweight and cost-efficient
-  - Suitable for basic navigation tasks
+Run development mode:
 
-### Local Models
-- **Setup Options**:
-  - Use Ollama or other custom OpenAI-compatible providers to run models locally
-  - Zero API costs and complete privacy with no data leaving your machine
+```bash
+pnpm dev
+```
 
-- **Recommended Models**:
-  - **Qwen3-30B-A3B-Instruct-2507**
-  - **Falcon3 10B**
-  - **Qwen 2.5 Coder 14B**
-  - **Mistral Small 24B**
-  - [Latest test results from community](https://gist.github.com/maximus2600/75d60bf3df62986e2254d5166e2524cb) 
-  - We welcome community experience sharing with other local models in our [Discord](https://discord.gg/NN3ABHggMK)
+Useful commands:
 
-- **Prompt Engineering**:
-  - Local models require more specific and cleaner prompts
-  - Avoid high-level, ambiguous commands
-  - Break complex tasks into clear, detailed steps
-  - Provide explicit context and constraints
+```bash
+pnpm build
+pnpm type-check
+pnpm test
+pnpm lint
+pnpm zip
+```
 
-> **Note**: The cost-effective configuration may produce less stable outputs and require more iterations for complex tasks.
+## Recommended Model Setups
 
-> **Tip**: Feel free to experiment with your own model configurations! Found a great combination? Share it with the community in our [Discord](https://discord.gg/NN3ABHggMK) to help others optimize their setup.
+### Better performance
 
-## 💡 See It In Action
+- Planner: Claude Sonnet 4
+- Navigator: Claude Haiku 3.5
 
-Here are some powerful tasks you can accomplish with just a sentence:
+### Budget-friendly
 
-1. **News Summary**:
-   > "Go to TechCrunch and extract top 10 headlines from the last 24 hours"
+- Planner: GPT-4o or Claude Haiku
+- Navigator: Gemini 2.5 Flash or GPT-4o-mini
 
-2. **GitHub Research**:
-   > "Look for the trending Python repositories on GitHub with most stars"
+### Local-first
 
-3. **Shopping Research**:
-   > "Find a portable Bluetooth speaker on Amazon with a water-resistant design, under $50. It should have a minimum battery life of 10 hours"
+Use Ollama or another OpenAI-compatible local provider if you want stronger privacy and lower recurring cost.
 
-## 🛠️ Roadmap
+## Example Tasks
 
-We're actively developing Agent-Guard with exciting features on the horizon — welcome to join us!
+- "Go to TechCrunch and summarize the top headlines from the last 24 hours."
+- "Look for trending Python repositories on GitHub with the highest stars."
+- "Find a portable Bluetooth speaker under $50 with water resistance and 10+ hours battery life."
+- "Compare three coworking spaces in Bangalore with pricing and ratings."
 
-**Security hardening** is our current primary focus. Each security phase ships as a standalone, production-ready milestone with its own unit and integration test suite. Track progress in our [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity).
+## Repository Structure
 
-For the full feature roadmap and broader discussions, visit our [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions).
+```text
+chrome-extension/   Main extension manifest and background logic
+pages/              Side panel, options page, content page, and UI entrypoints
+packages/           Shared workspaces for storage, i18n, UI, HMR, and tooling
+tests/              Focused tests for security UI and related flows
+```
 
-## 🤝 Contributing
+## Contributing
 
-**We need your help to make Agent-Guard even better!** Contributions of all kinds are welcome:
+Contributions are welcome, especially around:
 
-*  **Share Prompts & Use Cases** 
-   * share how you're using Agent Guard. Help us build a library of useful prompts and real-world use cases.
-   * Try Agent Guard and give us feedback on its performance or suggest improvements in our [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions).
-* **Contribute Code**
-   * Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute code to the project.
-   * Submit pull requests for bug fixes, features, or documentation improvements.
+- browser-agent safety
+- extension UX
+- model integrations
+- testing and reliability
+- documentation
 
+If you want to contribute, open an issue or submit a pull request.
 
-We believe in the power of open source and community collaboration. Join us in building the future of secure web automation!
+## Security Disclosure
 
+If you discover a real security vulnerability, please do not disclose it publicly first.
 
-## 🔒 Security
+Use a responsible reporting path instead of opening a public exploit issue.
 
-Agent-Guard is built with security as a first-class concern. Our [Security Roadmap](.claude/SECURITY_ROADMAP.md) documents our four-phase hardening program covering prompt injection defense, zero-click attack prevention, phishing detection, and model poisoning resistance.
+## Acknowledgments
 
-If you discover a security vulnerability, please **DO NOT** disclose it publicly through issues, pull requests, or discussions.
+Agent-Guard builds on ideas and tooling from:
 
-Instead, please create a [GitHub Security Advisory](https://github.com/TShreek/Agent-Guard18436/security/advisories/new) to report the vulnerability responsibly. This allows us to address the issue before it's publicly disclosed.
-
-We appreciate your help in keeping Agent-Guard and its users safe!
-
-## 💬 Community
-
-Join our growing community of developers and users:
-
-- [GitHub Discussions](https://github.com/TShreek/Agent-Guard18436/discussions) - Share ideas and ask questions
-- [Security Issues](https://github.com/TShreek/Agent-Guard18436/issues?q=label%3Asecurity) - Track the security hardening roadmap
-
-## 👏 Acknowledgments
-
-Agent Guard builds on top of other awesome open-source projects:
-
+- [Nanobrowser](https://github.com/nanobrowser/nanobrowser)
 - [Browser Use](https://github.com/browser-use/browser-use)
-- [Puppeteer](https://github.com/EmergenceAI/Agent-E)
 - [Chrome Extension Boilerplate](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite)
 - [LangChain](https://github.com/langchain-ai/langchainjs)
 
-Huge thanks to their creators and contributors!
+## Creator Note
 
-## 📄 License
+This repo is maintained as my own security-focused browser-agent project and experimentation space.
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+If you like the direction of the project, star the repo and follow along:
 
-Made with ❤️ by the Agent-Guard Team.
+- Repo: https://github.com/virtuoso-04/Agent-Guard18436
 
-Like Agent-Guard? Give us a star 🌟 on [GitHub](https://github.com/TShreek/Agent-Guard18436)!
+## License
 
-## ⚠️ DISCLAIMER ON DERIVATIVE PROJECTS
-
-**We explicitly *DO NOT* endorse, support, or participate in any** projects involving cryptocurrencies, tokens, NFTs, or other blockchain-related applications **based on this codebase.**
-
-**Any such derivative projects are NOT Affiliated with, or maintained by, or in any way connected to the official Agent Guard project or its core team.**
-
-**We assume NO LIABILITY for any losses, damages, or issues arising from the use of third-party derivative projects. Users interact with these projects at their own risk.**
-
-**We reserve the right to publicly distance ourselves from any misuse or misleading use of our name, codebase, or brand.**
-
-We encourage open-source innovation but urge our community to be discerning and cautious. Please ensure you understand the risks before using any software or service built upon our codebase by independent developers.
-
-
+Licensed under the Apache License 2.0. See [LICENSE](./LICENSE).
