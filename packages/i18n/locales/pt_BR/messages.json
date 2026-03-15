@@ -67,6 +67,12 @@
   "chat_input_placeholder": {
     "message": "Como posso ajudar?"
   },
+  "chat_empty_title": {
+    "message": "Como posso ajudar?"
+  },
+  "chat_empty_subtitle": {
+    "message": "O Agent-Guard está pronto para automatizar seu navegador com segurança."
+  },
   "chat_input_form": {
     "message": "Formulário de entrada de chat"
   },

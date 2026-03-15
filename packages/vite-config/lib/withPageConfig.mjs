@@ -23,7 +23,23 @@ export function withPageConfig(config) {
     deepmerge(
       {
         base: '',
-        plugins: [react(), isDev && watchRebuildPlugin({ refresh: true })],
+        plugins: [
+          react(),
+          isDev && watchRebuildPlugin({ refresh: true }),
+          {
+            name: 'fix-underscores',
+            generateBundle(_, bundle) {
+              for (const fileName in bundle) {
+                if (fileName.startsWith('_') && fileName !== '_locales') {
+                  const newName = fileName.replace(/^_+/, '');
+                  bundle[newName] = bundle[fileName];
+                  bundle[newName].fileName = newName;
+                  delete bundle[fileName];
+                }
+              }
+            },
+          },
+        ],
         server: {
           sourcemapIgnoreList: false,
         },
@@ -35,6 +51,16 @@ export function withPageConfig(config) {
           watch: watchOption,
           rollupOptions: {
             external: ['chrome'],
+            output: {
+              chunkFileNames: (chunkInfo) => {
+                const name = chunkInfo.name.replace(/^_+/, '');
+                return `assets/${name}-[hash].js`;
+              },
+              assetFileNames: (assetInfo) => {
+                const name = (assetInfo.name || 'asset').replace(/^_+/, '');
+                return `assets/${name}-[hash].[ext]`;
+              },
+            },
           },
         },
         define: {

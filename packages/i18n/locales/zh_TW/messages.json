@@ -67,6 +67,12 @@
   "chat_input_placeholder": {
     "message": "有什麼需要協助的嗎？"
   },
+  "chat_empty_title": {
+    "message": "我能幫您做什麼？"
+  },
+  "chat_empty_subtitle": {
+    "message": "Agent-Guard 已準備好安全地自動化您的瀏覽器。"
+  },
   "chat_input_form": {
     "message": "對話輸入表單"
   },

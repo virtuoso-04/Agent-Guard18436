@@ -20,6 +20,39 @@ export default defineConfig(({ mode }) => {
       '@root': rootDir,
       '@src': srcDir,
       '@assets': resolve(srcDir, 'assets'),
+      // Mock Node.js-only modules that might be pulled in by dependencies
+      '@puppeteer/browsers': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'proxy-agent': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:url': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:http': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:https': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:fs': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:path': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:stream': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:net': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:tls': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:events': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:util': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:os': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:crypto': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:buffer': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:assert': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'node:zlib': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'url': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'http': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'https': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'fs': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'path': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'stream': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'net': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'tls': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'events': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'util': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'os': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'crypto': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'buffer': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'assert': resolve(rootDir, 'utils/mocks/empty.ts'),
+      'zlib': resolve(rootDir, 'utils/mocks/empty.ts'),
     },
     conditions: ['browser', 'module', 'import', 'default'],
     mainFields: ['browser', 'module', 'main']
@@ -40,15 +73,28 @@ export default defineConfig(({ mode }) => {
     }) as PluginOption,
     watchPublicPlugin(),
     makeManifestPlugin({ outDir }),
-    isDev && watchRebuildPlugin({ reload: true, id: 'chrome-extension-hmr' }),
+    {
+      name: 'fix-underscores',
+      generateBundle(_, bundle) {
+        for (const fileName in bundle) {
+          if (fileName.startsWith('_') && fileName !== '_locales') {
+            const newName = fileName.replace(/^_+/, '');
+            bundle[newName] = bundle[fileName];
+            bundle[newName].fileName = newName;
+            delete bundle[fileName];
+          }
+        }
+      },
+    },
   ],
   publicDir: resolve(rootDir, 'public'),
   build: {
     lib: {
-      formats: ['iife'],
-      entry: resolve(__dirname, 'src/background/index.ts'),
-      name: 'BackgroundScript',
-      fileName: 'background',
+      formats: ['es'],
+      entry: {
+        background: resolve(__dirname, 'src/background/index.ts'),
+      },
+      fileName: (format) => `[name].js`,
     },
     outDir,
     emptyOutDir: false,
@@ -57,28 +103,18 @@ export default defineConfig(({ mode }) => {
     reportCompressedSize: isProduction,
     watch: watchOption,
     rollupOptions: {
-      external: [
-        'chrome',
-        // Puppeteer's browser management package is Node.js-only and should not
-        // be bundled into the extension IIFE — only puppeteer-core/browser is used.
-        '@puppeteer/browsers',
-        'proxy-agent',
-        'node:url',
-        'node:http',
-        'node:https',
-        'node:fs',
-        'node:path',
-        'node:stream',
-        'node:net',
-        'node:tls',
-        'node:events',
-        'node:util',
-        'node:os',
-        'node:crypto',
-        'node:buffer',
-        'node:assert',
-        'node:zlib',
-      ],
+      external: ['chrome'],
+      output: {
+        entryFileNames: '[name].js',
+        chunkFileNames: (chunkInfo) => {
+          const name = chunkInfo.name.replace(/^_+/, '');
+          return `chunks/${name}-[hash].js`;
+        },
+        assetFileNames: (assetInfo) => {
+          let name = (assetInfo.name || 'asset').replace(/^_+/, '');
+          return `assets/${name}-[hash].[ext]`;
+        },
+      },
     },
   },
 

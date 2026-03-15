@@ -64,7 +64,7 @@ const manifest = withOperaSidebar(
     permissions: ['storage', 'scripting', 'tabs', 'activeTab', 'debugger', 'unlimitedStorage', 'webNavigation'],
     options_page: 'options/index.html',
     background: {
-      service_worker: 'background.iife.js',
+      service_worker: 'background.js',
       type: 'module',
     },
     action: {
@@ -77,8 +77,9 @@ const manifest = withOperaSidebar(
       {
         matches: ['http://*/*', 'https://*/*', '<all_urls>'],
         all_frames: true,
-        js: ['content/index.iife.js'],
-      },
+        "js": [
+        "content/main-content.iife.js"
+      ]},
     ],
     web_accessible_resources: [
       {

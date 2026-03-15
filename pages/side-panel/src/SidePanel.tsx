@@ -19,6 +19,30 @@ import './SidePanel.css';
 
 const SECURITY_EVENT_STORAGE_KEY = 'agent-guard:security-events';
 const SECURITY_EVENT_DISMISSALS_KEY = 'agent-guard:security-events-dismissed';
+
+const AgentGuardLogo = ({ size = 48 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="48" height="48" rx="14" fill="url(#logoGrad)" />
+    <path
+      d="M24 8L10 14v11C10 33.3 16.4 40.76 24 43c7.6-2.24 14-9.7 14-18V14L24 8z"
+      fill="white"
+      fillOpacity="0.9"
+    />
+    <path
+      d="M18 24l4 4 8-8"
+      stroke="#6366f1"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <defs>
+      <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#6366f1" />
+        <stop offset="1" stopColor="#06b6d4" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
 const focusRingClasses =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-guard-primary focus-visible:shadow-lg focus-visible:shadow-guard-primary/30';
 
@@ -65,17 +89,20 @@ const SidePanel = () => {
   const recordingTimerRef = useRef<number | null>(null);
   const dismissedEventIdsRef = useRef<Set<string>>(new Set());
 
-  // Check for dark mode preference
+  // Dark mode: stored preference (from Options page) wins, else follow system
   useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeMediaQuery.matches);
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
+    const stored = localStorage.getItem('agent-guard:theme');
+    if (stored === 'dark' || stored === 'light') {
+      setIsDarkMode(stored === 'dark');
+      return;
+    }
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('agent-guard:theme')) setIsDarkMode(e.matches);
     };
-
-    darkModeMediaQuery.addEventListener('change', handleChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, []);
 
   // Check if models are configured
@@ -1155,11 +1182,10 @@ const SidePanel = () => {
   };
 
   return (
-    <div>
-      <div
-        className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : "bg-[url('/bg.jpg')] bg-cover bg-no-repeat"} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[rgb(186,230,253)]'} rounded-2xl`}>
-        <header className="header glass">
-          <div className="header-logo">
+    <div
+      className={`flex h-screen flex-col overflow-hidden ${isDarkMode ? 'dark bg-[#08080f] text-[#f5f5f7]' : 'light bg-[#f2f2f7] text-[#1d1d1f]'}`}>
+        <header className="header">
+          <div className="flex items-center gap-2">
             {showHistory ? (
               <button
                 type="button"
@@ -1169,12 +1195,28 @@ const SidePanel = () => {
                 {t('nav_back')}
               </button>
             ) : (
-              <span>Agent Guard</span>
+              <>
+                {/* Shield badge — matches Options sidebar logo */}
+                <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-indigo-500 to-cyan-500 shadow-[0_2px_8px_rgba(99,102,241,0.4)]">
+                  <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+                    <path
+                      d="M12 2L4.5 5.5v5C4.5 15.1 7.8 19.3 12 20.5c4.2-1.2 7.5-5.4 7.5-10V5.5L12 2z"
+                      fill="white"
+                      fillOpacity="0.92"
+                    />
+                    <path
+                      d="M9 12l2 2 4-4"
+                      stroke="#6366f1"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <span className="header-logo">Agent Guard</span>
+              </>
             )}
           </div>
-          {tokenUsage > 0 && (
-            <TokenDisplay tokenUsage={tokenUsage} maxTokens={MAX_CONTEXT_TOKENS} isDarkMode={isDarkMode} />
-          )}
           <div className="header-icons">
             <SecurityBadge
               level={securityLevel}
@@ -1225,32 +1267,141 @@ const SidePanel = () => {
           <>
             {/* Show loading state while checking model configuration */}
             {hasConfiguredModels === null && (
-              <div
-                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
+              <div className="flex flex-1 items-center justify-center p-8">
                 <div className="text-center">
-                  <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-sky-400 border-t-transparent"></div>
-                  <p>{t('status_checkingConfig')}</p>
+                  <div className="mx-auto mb-4 size-7 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent opacity-70" />
+                  <p className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {t('status_checkingConfig')}
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Show setup message when no models are configured */}
             {hasConfiguredModels === false && (
-              <div className="flex flex-1 items-center justify-center p-8">
-                <div className="max-w-md text-center">
-                  <div
-                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow-xl`}>
-                    <img src="/logo.png" className="h-12 w-12" alt="Agent-Guard" />
+              <div className={`flex flex-1 flex-col overflow-y-auto ${isDarkMode ? 'bg-[#080810]' : 'bg-gradient-to-b from-[#f5f5ff] via-white to-white'}`}>
+
+                {/* Hero */}
+                <div className="relative flex flex-col items-center px-6 pt-12 pb-5 overflow-hidden">
+                  {/* Ambient glow blobs */}
+                  <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full bg-indigo-500/[0.12] blur-3xl" />
+                  <div className="pointer-events-none absolute top-10 left-1/3 h-28 w-28 rounded-full bg-cyan-500/[0.08] blur-2xl" />
+
+                  {/* Logo with glow ring */}
+                  <div className="relative z-10 mb-5">
+                    <div className="absolute inset-0 scale-[1.6] rounded-3xl bg-gradient-to-br from-indigo-500/30 to-cyan-500/20 blur-2xl" />
+                    <AgentGuardLogo size={60} />
                   </div>
-                  <h3 className="mb-2 text-3xl font-bold font-['Outfit'] tracking-tight">{t('welcome_title')}</h3>
-                  <p className={`mb-6 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {t('welcome_instruction')}
+
+                  {/* Eyebrow label */}
+                  <p className={`z-10 mb-1.5 text-[10px] font-bold uppercase tracking-[0.22em] ${isDarkMode ? 'text-indigo-400' : 'text-indigo-500'}`}>
+                    Agent Guard
                   </p>
+
+                  {/* Headline */}
+                  <h2 className={`z-10 text-center text-[22px] font-bold font-['Outfit'] tracking-tight leading-snug ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                    Secure AI Automation
+                  </h2>
+
+                  {/* Sub-headline */}
+                  <p className={`z-10 mt-2 max-w-[210px] text-center text-[12.5px] leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Multi-agent security layer for safe, private browser automation.
+                  </p>
+
+                  {/* Feature pills */}
+                  <div className="z-10 mt-4 flex flex-wrap justify-center gap-1.5">
+                    {[
+                      { label: 'Secure', emoji: '🛡️' },
+                      { label: 'Private', emoji: '🔒' },
+                      { label: 'Multi-Agent', emoji: '⚡' },
+                    ].map(f => (
+                      <span
+                        key={f.label}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                          isDarkMode
+                            ? 'bg-white/6 text-slate-300 border border-white/10'
+                            : 'bg-indigo-50 text-indigo-600 border border-indigo-100/80'
+                        }`}>
+                        <span>{f.emoji}</span>
+                        {f.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className={`mx-5 h-px ${isDarkMode ? 'bg-white/6' : 'bg-slate-100'}`} />
+
+                {/* Steps */}
+                <div className="px-5 py-4 space-y-2.5">
+                  <p className={`mb-3 text-[9.5px] font-bold uppercase tracking-[0.18em] ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Get started in 3 steps
+                  </p>
+
+                  {[
+                    {
+                      n: '1',
+                      title: 'Choose a provider',
+                      sub: 'OpenAI, Anthropic, Gemini, Ollama…',
+                    },
+                    {
+                      n: '2',
+                      title: 'Add your API key',
+                      sub: 'Stored locally — never leaves your device',
+                    },
+                    {
+                      n: '3',
+                      title: 'Start automating',
+                      sub: 'Browse, research, and automate safely',
+                    },
+                  ].map(step => (
+                    <div
+                      key={step.n}
+                      className={`flex items-start gap-3 rounded-2xl px-3.5 py-3 ${
+                        isDarkMode
+                          ? 'bg-white/[0.04] border border-white/[0.06]'
+                          : 'bg-white border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.04)]'
+                      }`}>
+                      <span
+                        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                          isDarkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
+                        }`}>
+                        {step.n}
+                      </span>
+                      <div className="min-w-0">
+                        <p className={`text-[13px] font-semibold leading-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+                          {step.title}
+                        </p>
+                        <p className={`mt-0.5 text-[11px] leading-tight ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                          {step.sub}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <div className="px-5 pb-10 pt-1">
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
-                    className="rounded-full bg-guard-primary px-10 py-4 font-bold text-white transition-all hover:scale-105 active:scale-95 shadow-xl hover:shadow-guard-primary/20">
-                    {t('welcome_openSettings')}
+                    className={`group relative w-full overflow-hidden rounded-2xl px-6 py-3.5 text-sm font-bold text-white tracking-[-0.01em] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                      isDarkMode
+                        ? 'bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30'
+                        : 'bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40'
+                    }`}>
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      {t('welcome_openSettings')}
+                      <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
+                    {/* Shimmer overlay */}
+                    <div className="absolute inset-0 -skew-x-12 translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
                   </button>
+
+                  <p className={`mt-3 text-center text-[10px] ${isDarkMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Free &amp; open source · No data collection
+                  </p>
                 </div>
               </div>
             )}
@@ -1259,19 +1410,26 @@ const SidePanel = () => {
             {hasConfiguredModels === true && (
               <div className="flex flex-1 flex-col overflow-hidden">
                 {messages.length === 0 ? (
-                  <div className="flex flex-1 flex-col overflow-y-auto pt-16">
-                    <div className="mb-8 text-center px-6">
-                      <h1 className="mb-2 text-3xl font-bold font-['Outfit'] tracking-tight">
+                  <div className="flex flex-1 flex-col overflow-y-auto">
+                    {/* Hero */}
+                    <div className="flex flex-col items-center pt-10 pb-4 px-6">
+                      <div className="mb-4">
+                        <AgentGuardLogo size={52} />
+                      </div>
+                      <h1 className="mb-1 text-2xl font-bold font-['Outfit'] tracking-tight text-center">
                         {t('chat_empty_title')}
                       </h1>
-                      <p className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      <p className={`text-xs text-center leading-relaxed max-w-[220px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                         {t('chat_empty_subtitle')}
                       </p>
                     </div>
 
+                    {/* Divider */}
+                    <div className={`mx-5 mb-4 h-px ${isDarkMode ? 'bg-white/8' : 'bg-black/6'}`} />
+
                     <SuggestedPrompts onSelect={p => handleSendMessage(p)} isDarkMode={isDarkMode} />
 
-                    <div className="mt-8 flex-1 px-4 pb-8 text-left">
+                    <div className="mt-4 flex-1 px-4 pb-8 text-left">
                       <BookmarkList
                         bookmarks={favoritePrompts}
                         onBookmarkSelect={handleSendMessage}
@@ -1289,7 +1447,28 @@ const SidePanel = () => {
                   </div>
                 )}
 
+                {isHistoricalSession && (
+                  <div
+                    className={`mx-4 mb-1 flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs ${
+                      isDarkMode
+                        ? 'bg-slate-800/70 text-slate-400 border border-slate-700'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    }`}>
+                    <span>Viewing past session — read only</span>
+                    <button
+                      type="button"
+                      onClick={handleNewChat}
+                      className="font-semibold text-guard-primary hover:underline shrink-0">
+                      New chat
+                    </button>
+                  </div>
+                )}
                 <div className="input-container">
+                  {tokenUsage > 0 && (
+                    <div className="mb-2 flex justify-center">
+                      <TokenDisplay tokenUsage={tokenUsage} maxTokens={MAX_CONTEXT_TOKENS} isDarkMode={isDarkMode} />
+                    </div>
+                  )}
                   <ChatInput
                     onSendMessage={handleSendMessage}
                     onStopTask={handleStopTask}
@@ -1310,7 +1489,6 @@ const SidePanel = () => {
             )}
           </>
         )}
-      </div>
     </div>
   );
 };
