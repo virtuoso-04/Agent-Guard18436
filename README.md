@@ -1,12 +1,18 @@
 # Agent-Guard
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ec60b0c4-87ba-48f4-981a-c55ed0e8497b" alt="Agent-Guard banner" width="420" />
-
-  <p><strong>Security-first AI web automation built for the real browser, not a sandboxed demo.</strong></p>
+  <h1>Agent-Guard</h1>
+  <p><strong>Security-first browser automation with live defenses, auditability, and local control.</strong></p>
+  <p>Built to help AI agents browse the web more safely in the real world.</p>
 
   <p>
-    <a href="https://github.com/virtuoso-04/Agent-Guard18436"><img src="https://img.shields.io/badge/GitHub-Agent--Guard-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+    <img src="https://img.shields.io/badge/Secure%20Agents-Browser%20Native-111827?style=for-the-badge" alt="Secure Agents" />
+    <img src="https://img.shields.io/badge/Privacy-Local%20First-0f766e?style=for-the-badge" alt="Local First" />
+    <img src="https://img.shields.io/badge/Runtime-Threat%20Aware-7c3aed?style=for-the-badge" alt="Threat Aware" />
+  </p>
+
+  <p>
+    <a href="https://github.com/virtuoso-04/Agent-Guard18436"><img src="https://img.shields.io/badge/Repo-Agent--Guard-181717?style=for-the-badge&logo=github&logoColor=white" alt="Repo" /></a>
     <a href="https://github.com/virtuoso-04/Agent-Guard18436/stargazers"><img src="https://img.shields.io/github/stars/virtuoso-04/Agent-Guard18436?style=for-the-badge" alt="Stars" /></a>
     <a href="https://github.com/virtuoso-04/Agent-Guard18436/issues"><img src="https://img.shields.io/github/issues/virtuoso-04/Agent-Guard18436?style=for-the-badge" alt="Issues" /></a>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge" alt="License" /></a>
@@ -17,7 +23,7 @@
 
 ## What Is Agent-Guard?
 
-Agent-Guard is an open-source, security-hardened browser agent based on the Nanobrowser architecture and reworked with a much stronger security posture.
+Agent-Guard is an open-source, security-hardened browser agent focused on making AI web automation safer, more observable, and easier to control.
 
 It combines:
 
@@ -79,7 +85,7 @@ This includes subsystems for:
 
 ## What Makes This Version Different
 
-This repo is not just a renamed fork.
+This repo is a security-focused project with its own direction and UX choices.
 
 It includes work on:
 
