@@ -10,8 +10,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeFingerprint, verifyFingerprint } from '../domFingerprint';
-import { captureSnapshot, verifySnapshot, buildPageStateSummary } from '../atomicLock';
+import { computeFingerprint, verifyFingerprint } from '../../dom/domFingerprint';
+import { captureSnapshot, verifySnapshot, buildPageStateSummary } from '../../dom/atomicLock';
 import { DomTaintAnalyzer } from '../domTaint';
 import { DOMElementNode } from '../../../../browser/dom/views';
 

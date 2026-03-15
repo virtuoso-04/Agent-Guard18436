@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { IntentAnchoring } from '../intentAnchoring';
-import { BehavioralAuditor } from '../behavioralAuditor';
-import { SecurityTracer } from '../securityTracer';
+import { IntentAnchoring } from '../../behavior/intentAnchoring';
+import { BehavioralAuditor } from '../../behavior/behavioralAuditor';
+import { SecurityTracer } from '../../behavior/securityTracer';
 import { generateSessionKey } from '../../../../agent/messages/crypto';
 
 describe('Phase 4 Integration: Model Poisoning & Behavioral Anomalies', () => {

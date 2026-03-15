@@ -19,7 +19,13 @@ export class CredentialVerifier {
     context: CredentialContext | null,
     fieldType: string,
   ): CredentialVerificationResult {
-    const url = new URL(currentUrl);
+    let url: URL;
+    try {
+      url = new URL(currentUrl);
+    } catch {
+      // Non-parseable URL — allow input but don't verify
+      return { allowed: true, reason: 'URL could not be parsed for credential verification.', isLookalike: false };
+    }
     const hostname = url.hostname;
 
     // HTTPS enforcement

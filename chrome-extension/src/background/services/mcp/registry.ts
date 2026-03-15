@@ -29,7 +29,7 @@ export interface MCPToolDescriptor {
   inputSchema: {
     type: 'object';
     properties: Record<string, unknown>;
-    required?: string[];
+    required?: string[] | readonly string[];
   };
 }
 
@@ -135,7 +135,7 @@ class MCPRegistry {
     const tool = this.tools.get(toolName);
 
     if (!tool) {
-      logger.warn(`[MCPRegistry] Unknown tool requested: ${toolName}`);
+      logger.warning(`[MCPRegistry] Unknown tool requested: ${toolName}`);
       return {
         toolName,
         success: false,

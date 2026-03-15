@@ -30,6 +30,21 @@ export class RoutingProxy extends BaseChatModel {
     super({});
     this.active = initialModel;
     this.activeLabel = label;
+    // BaseChatModel sets `modelName` as an instance property in its constructor,
+    // shadowing any prototype getter. Redefine it on this instance so BaseAgent
+    // always reads the active model's real name even after model swaps.
+    Object.defineProperty(this, 'modelName', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      get: (): string => {
+        const m = this.active as unknown as Record<string, unknown>;
+        if (m['modelName']) return m['modelName'] as string;
+        if (m['model_name']) return m['model_name'] as string;
+        if (m['model']) return m['model'] as string;
+        return this.activeLabel;
+      },
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   _llmType(): string {

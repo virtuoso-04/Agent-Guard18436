@@ -57,9 +57,15 @@ chrome.tabs.onRemoved.addListener(tabId => {
 chrome.webNavigation.onCommitted.addListener(details => {
   // Only track main frame navigations for the tab currently managed by browserContext
   if (details.frameId === 0 && details.tabId) {
+    let domain = details.url;
+    try {
+      domain = new URL(details.url).hostname;
+    } catch {
+      /* keep raw url as domain */
+    }
     browserContext.recordNavigationHop(details.tabId, {
       url: details.url,
-      domain: new URL(details.url).hostname, // Simplified, ETLD+1 could be more precise
+      domain,
       timestamp: Date.now(),
       transitionType: details.transitionType,
       transitionQualifiers: details.transitionQualifiers,

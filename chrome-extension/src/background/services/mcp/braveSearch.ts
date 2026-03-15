@@ -12,7 +12,7 @@
  * API Docs: https://api.search.brave.com/app/documentation/web-search/get-started
  */
 
-import { sanitizeForLLM } from '../security/content/sanitizer';
+import { sanitizeContent } from '../security/content/sanitizer';
 import { serializeToon } from '@src/background/agent/toon/parser';
 import type { ToonFieldDef, ToonData } from '@src/background/agent/toon/types';
 import { createLogger } from '@src/background/log';
@@ -128,11 +128,12 @@ export async function braveWebSearch(
   const rawText = webResults.map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.description}`).join('\n\n');
 
   // Pass through Guard's content sanitizer to prevent search-result injection
-  const sanitized = sanitizeForLLM(rawText);
-  const wasModified = sanitized !== rawText;
+  const sanitizeResult = sanitizeContent(rawText);
+  const sanitized = sanitizeResult.sanitized;
+  const wasModified = sanitizeResult.modified;
 
   if (wasModified) {
-    logger.warn('[BraveSearch] Guard sanitizer modified search results — potential injection attempt detected.');
+    logger.warning('[BraveSearch] Guard sanitizer modified search results — potential injection attempt detected.');
   }
 
   logger.info(`[BraveSearch] Returned ${webResults.length} results. Modified by Guard: ${wasModified}`);

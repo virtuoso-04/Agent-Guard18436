@@ -190,6 +190,56 @@ export function isExtensionConflictError(error: unknown): boolean {
   return errorMessage.includes('cannot access a chrome-extension') && errorMessage.includes('of different extension');
 }
 
+/**
+ * Custom error class for API rate-limit / quota-exceeded errors (HTTP 429).
+ * These are fatal for the current task — retrying immediately won't help.
+ */
+export class ChatModelRateLimitError extends Error {
+  readonly retryAfterSeconds?: number;
+
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+    retryAfterSeconds?: number,
+  ) {
+    super(message);
+    this.name = 'ChatModelRateLimitError';
+    this.retryAfterSeconds = retryAfterSeconds;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ChatModelRateLimitError);
+    }
+  }
+
+  toString(): string {
+    return `${this.name}: ${this.message}${this.cause ? ` (Caused by: ${this.cause})` : ''}`;
+  }
+}
+
+/**
+ * Checks if an error is a rate-limit / quota-exceeded error (HTTP 429).
+ */
+export function isRateLimitError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message || '';
+  return (
+    msg.includes('[429') ||
+    msg.includes('429 ') ||
+    msg.toLowerCase().includes('quota exceeded') ||
+    msg.toLowerCase().includes('rate limit') ||
+    msg.toLowerCase().includes('too many requests') ||
+    msg.toLowerCase().includes('resource_exhausted')
+  );
+}
+
+/**
+ * Extract the retry-after delay (seconds) from a 429 error message.
+ */
+export function extractRetryAfter(error: unknown): number | undefined {
+  if (!(error instanceof Error)) return undefined;
+  const match = error.message.match(/retry[^0-9]*(\d+(?:\.\d+)?)\s*s/i);
+  return match ? Math.ceil(parseFloat(match[1])) : undefined;
+}
+
 export class RequestCancelledError extends Error {
   constructor(message: string) {
     super(message);

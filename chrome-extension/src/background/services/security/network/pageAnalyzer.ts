@@ -10,8 +10,19 @@ export interface PhishingPageScore {
 
 export class PageAnalyzer {
   public async analyze(state: BrowserState, url: string): Promise<PhishingPageScore> {
+    // Skip analysis for non-http URLs (chrome://, about:blank, extension pages, etc.)
+    let hostname: string;
+    try {
+      const parsed = new URL(url);
+      if (!parsed.protocol.startsWith('http')) {
+        return { score: 100, risk: 'none', signals: [], recommendation: 'allow' };
+      }
+      hostname = parsed.hostname;
+    } catch {
+      return { score: 100, risk: 'none', signals: [], recommendation: 'allow' };
+    }
+
     const signals: PhishingSignal[] = [];
-    const hostname = new URL(url).hostname;
 
     // Detect Credential Form on HTTP
     if (url.startsWith('http://') && !url.startsWith('http://localhost') && !url.startsWith('http://127.0.0.1')) {

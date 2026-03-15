@@ -6,7 +6,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { createLogger } from '@src/background/log';
 import type { Action } from '../actions/builder';
 import { convertInputMessages, extractJsonFromModelOutput, removeThinkTags } from '../messages/utils';
-import { isAbortedError, ResponseParseError } from './errors';
+import { isAbortedError, isRateLimitError, ResponseParseError } from './errors';
 import { ProviderTypeEnum } from '@agent-guard/storage';
 
 const logger = createLogger('agent');
@@ -154,6 +154,11 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
         throw new Error('Could not parse response with structured output');
       } catch (error) {
         if (isAbortedError(error)) {
+          throw error;
+        }
+        // Pass rate-limit errors through unwrapped so the caller's catch can
+        // detect them by type and abort immediately (no retries, no failure count).
+        if (isRateLimitError(error)) {
           throw error;
         }
 

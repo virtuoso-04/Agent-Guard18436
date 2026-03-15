@@ -15,6 +15,7 @@ import {
   ChatModelAuthError,
   ChatModelBadRequestError,
   ChatModelForbiddenError,
+  ChatModelRateLimitError,
   ExtensionConflictError,
   RequestCancelledError,
   MaxStepsReachedError,
@@ -335,6 +336,7 @@ export class Executor {
         error instanceof ChatModelAuthError ||
         error instanceof ChatModelBadRequestError ||
         error instanceof ChatModelForbiddenError ||
+        error instanceof ChatModelRateLimitError ||
         error instanceof URLNotAllowedError ||
         error instanceof RequestCancelledError ||
         error instanceof ExtensionConflictError
@@ -415,6 +417,7 @@ export class Executor {
         error instanceof ChatModelAuthError ||
         error instanceof ChatModelBadRequestError ||
         error instanceof ChatModelForbiddenError ||
+        error instanceof ChatModelRateLimitError ||
         error instanceof URLNotAllowedError ||
         error instanceof RequestCancelledError ||
         error instanceof ExtensionConflictError
@@ -422,7 +425,6 @@ export class Executor {
         throw error;
       }
       context.consecutiveFailures++;
-      logger.error(`Failed to execute step: ${error}`);
       if (context.consecutiveFailures >= context.options.maxFailures) {
         throw new MaxFailuresReachedError(t('exec_errors_maxFailuresReached'));
       }

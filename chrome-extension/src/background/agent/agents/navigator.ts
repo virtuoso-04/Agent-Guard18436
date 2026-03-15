@@ -11,6 +11,7 @@ import {
   ChatModelAuthError,
   ChatModelBadRequestError,
   ChatModelForbiddenError,
+  ChatModelRateLimitError,
   EXTENSION_CONFLICT_ERROR_MESSAGE,
   ExtensionConflictError,
   isAbortedError,
@@ -18,6 +19,8 @@ import {
   isBadRequestError,
   isExtensionConflictError,
   isForbiddenError,
+  isRateLimitError,
+  extractRetryAfter,
   ResponseParseError,
   LLM_FORBIDDEN_ERROR_MESSAGE,
   RequestCancelledError,
@@ -114,6 +117,11 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         }
       } catch (error) {
         if (isAbortedError(error)) {
+          throw error;
+        }
+        // Pass rate-limit errors through unwrapped so the outer execute() catch
+        // can detect them by type and abort fast (no retries, no failure count).
+        if (isRateLimitError(error)) {
           throw error;
         }
 
@@ -295,7 +303,15 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       this.removeLastStateMessageFromMemory();
       const errorMessage = error instanceof Error ? error.message : String(error);
       // Check if this is an authentication error
-      if (isAuthenticationError(error)) {
+      if (isRateLimitError(error)) {
+        const retryAfter = extractRetryAfter(error);
+        const retryMsg = retryAfter ? ` Please retry in ${retryAfter}s.` : '';
+        throw new ChatModelRateLimitError(
+          `API quota exceeded — your model has reached its rate limit.${retryMsg} Check your plan at https://ai.google.dev/gemini-api/docs/rate-limits`,
+          error,
+          retryAfter,
+        );
+      } else if (isAuthenticationError(error)) {
         throw new ChatModelAuthError(errorMessage, error);
       } else if (isBadRequestError(error)) {
         throw new ChatModelBadRequestError(errorMessage, error);

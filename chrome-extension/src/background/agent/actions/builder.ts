@@ -180,11 +180,16 @@ export class ActionBuilder {
     actions.push(searchGoogle);
 
     const goToUrl = new Action(async (input: z.infer<typeof goToUrlActionSchema.schema>) => {
-      const intent = input.intent || t('act_goToUrl_start', [input.url]);
+      // Normalize URL: add https:// if the LLM omits the protocol
+      let targetUrl = input.url.trim();
+      if (targetUrl && !targetUrl.includes('://')) {
+        targetUrl = `https://${targetUrl}`;
+      }
+      const intent = input.intent || t('act_goToUrl_start', [targetUrl]);
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
 
-      await this.context.browserContext.navigateTo(input.url);
-      const msg2 = t('act_goToUrl_ok', [input.url]);
+      await this.context.browserContext.navigateTo(targetUrl);
+      const msg2 = t('act_goToUrl_ok', [targetUrl]);
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
       return new ActionResult({
         extractedContent: msg2,
@@ -306,10 +311,16 @@ export class ActionBuilder {
           );
 
           if (isMFA) {
+            let mfaHostname = state.url;
+            try {
+              mfaHostname = new URL(state.url).hostname;
+            } catch {
+              /* keep raw url */
+            }
             this.context.emitEvent(
               Actors.NAVIGATOR,
               ExecutionState.MFA_INPUT_DETECTED,
-              `MFA input detected on ${new URL(state.url).hostname}`,
+              `MFA input detected on ${mfaHostname}`,
             );
           }
 
